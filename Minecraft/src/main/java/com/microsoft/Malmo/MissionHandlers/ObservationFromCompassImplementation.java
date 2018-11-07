@@ -34,13 +34,19 @@ import com.microsoft.Malmo.Schemas.MissionInit;
  */
 public class ObservationFromCompassImplementation extends HandlerBase implements IObservationProducer {
 
-	private float addCompassJSON(JsonObject compassJson){
+	@Override
+	public void writeObservationsToJSON(JsonObject json, MissionInit missionInit) {
+		EntityPlayerSP player = Minecraft.getMinecraft().player;
+		if (player == null)
+			return;
+
+		//BAH testing
 		Minecraft mc = Minecraft.getMinecraft();
 		ItemStack compassStack = null;
-		boolean hasCompass = false,
-				hasHotbarCompass = false,
-				hasMainHandCompass = false,
-				hasOffHandCompass = false;
+		boolean hasCompass = false;
+		boolean hasHotbarCompass = false;
+		boolean hasMainHandCompass = false;
+		boolean	hasOffHandCompass = false;
 		// If player has a compass use that one
 		// Offhand compass
 		for (ItemStack itemStack : mc.player.inventory.offHandInventory) {
@@ -67,24 +73,14 @@ public class ObservationFromCompassImplementation extends HandlerBase implements
 
 		IItemPropertyGetter angleGetter = compassStack.getItem().getPropertyGetter(new ResourceLocation("angle"));
 		float angle = angleGetter.apply(compassStack, mc.world, mc.player);
-		compassJson.addProperty("angle", angle); // Current compass angle [0 - 1]
-		compassJson.addProperty("hasCompass", hasCompass); //Player has compass in main inv or offhand inv
-		compassJson.addProperty("hasHotbarCompass", hasHotbarCompass); //Player has compass in hotbar
-		compassJson.addProperty("hasActiveCompass", hasMainHandCompass || hasOffHandCompass); //Player is holding a compass
-		compassJson.addProperty("hasMainHandCompass", hasMainHandCompass); //Player is holding a mainhand compass
-		compassJson.addProperty("hasOffHandCompass", hasOffHandCompass); //Player is holding an offhand compass
-		//return compassJson;
-	}
+		json.addProperty("angle", angle); // Current compass angle [0 - 1]
+		json.addProperty("hasCompass", hasCompass); //Player has compass in main inv or offhand inv
+		json.addProperty("hasHotbarCompass", hasHotbarCompass); //Player has compass in hotbar
+		json.addProperty("hasActiveCompass", hasMainHandCompass || hasOffHandCompass); //Player is holding a compass
+		json.addProperty("hasMainHandCompass", hasMainHandCompass); //Player is holding a mainhand compass
+		json.addProperty("hasOffHandCompass", hasOffHandCompass); //Player is holding an offhand compass
 
-	@Override
-	public void writeObservationsToJSON(JsonObject json, MissionInit missionInit) {
-		EntityPlayerSP player = Minecraft.getMinecraft().player;
-		if (player == null)
-			return;
-		//BAH testing
-        addCompassJSON(json);
-
-		InventoryPlayer inventory = player.inventory;
+        InventoryPlayer inventory = player.inventory;
 		boolean flag = false;
 		for (int i = 0; i < 41; i++)
 			if (inventory.getStackInSlot(i).getItem() instanceof ItemCompass)
