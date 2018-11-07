@@ -26,6 +26,11 @@ import net.minecraft.util.math.BlockPos;
 import com.google.gson.JsonObject;
 import com.microsoft.Malmo.MissionHandlerInterfaces.IObservationProducer;
 import com.microsoft.Malmo.Schemas.MissionInit;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemCompass;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.util.NonNullList;
+
 
 /**
  * Creates observations from a compass in the agent's inventory.
