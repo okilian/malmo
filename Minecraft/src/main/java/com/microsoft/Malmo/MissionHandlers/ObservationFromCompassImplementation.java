@@ -31,6 +31,8 @@ import net.minecraft.item.ItemCompass;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.item.IItemPropertyGetter;
+import net.minecraft.util.ResourceLocation;
+
 
 
 /**
