@@ -104,7 +104,6 @@ public class ObservationFromCompassImplementation extends HandlerBase implements
 			double idealYaw = ((Math.atan2(dz, dx) + Math.PI) * 180.0 / Math.PI);
 			double playerYaw = player.rotationYaw;
 			double difference = idealYaw - playerYaw;
-			player.rotationYaw
 			if (difference < 0)
 				difference += 360;
 			if (difference > 360)
