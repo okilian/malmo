@@ -34,11 +34,56 @@ import com.microsoft.Malmo.Schemas.MissionInit;
  */
 public class ObservationFromCompassImplementation extends HandlerBase implements IObservationProducer {
 
+	private float addCompassJSON(JsonObject compassJson){
+		Minecraft mc = Minecraft.getMinecraft();
+		ItemStack compassStack = null;
+		boolean hasCompass = false,
+				hasHotbarCompass = false,
+				hasMainHandCompass = false,
+				hasOffHandCompass = false;
+		// If player has a compass use that one
+		// Offhand compass
+		for (ItemStack itemStack : mc.player.inventory.offHandInventory) {
+			if (itemStack.getItem() instanceof ItemCompass) {
+				compassStack = itemStack;
+				hasCompass = true; hasOffHandCompass = true;
+				break;
+			}
+		}
+		// Main Inventory compass
+		int invSlot = 0;
+		for (ItemStack itemStack : mc.player.inventory.mainInventory) {
+			if (itemStack.getItem() instanceof ItemCompass) {
+				compassStack = itemStack;
+				hasCompass = true;
+				if (invSlot < InventoryPlayer.getHotbarSize()) { hasHotbarCompass = true; }
+				if (invSlot == mc.player.inventory.currentItem) { hasMainHandCompass = true;}
+				invSlot += 1;
+			}
+		}
+		if (!hasCompass) {
+			compassStack = new ItemStack(new ItemCompass());
+		}
+
+		IItemPropertyGetter angleGetter = compassStack.getItem().getPropertyGetter(new ResourceLocation("angle"));
+		float angle = angleGetter.apply(compassStack, mc.world, mc.player);
+		compassJson.addProperty("angle", angle); // Current compass angle [0 - 1]
+		compassJson.addProperty("hasCompass", hasCompass); //Player has compass in main inv or offhand inv
+		compassJson.addProperty("hasHotbarCompass", hasHotbarCompass); //Player has compass in hotbar
+		compassJson.addProperty("hasActiveCompass", hasMainHandCompass || hasOffHandCompass); //Player is holding a compass
+		compassJson.addProperty("hasMainHandCompass", hasMainHandCompass); //Player is holding a mainhand compass
+		compassJson.addProperty("hasOffHandCompass", hasOffHandCompass); //Player is holding an offhand compass
+		//return compassJson;
+	}
+
 	@Override
 	public void writeObservationsToJSON(JsonObject json, MissionInit missionInit) {
 		EntityPlayerSP player = Minecraft.getMinecraft().player;
 		if (player == null)
 			return;
+		//BAH testing
+        addCompassJSON(json);
+
 		InventoryPlayer inventory = player.inventory;
 		boolean flag = false;
 		for (int i = 0; i < 41; i++)
@@ -63,7 +108,7 @@ public class ObservationFromCompassImplementation extends HandlerBase implements
 			double idealYaw = ((Math.atan2(dz, dx) + Math.PI) * 180.0 / Math.PI);
 			double playerYaw = player.rotationYaw;
 			double difference = idealYaw - playerYaw;
-
+			player.rotationYaw
 			if (difference < 0)
 				difference += 360;
 			if (difference > 360)
