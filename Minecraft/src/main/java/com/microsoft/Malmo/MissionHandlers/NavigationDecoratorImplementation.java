@@ -43,6 +43,7 @@ public class NavigationDecoratorImplementation extends HandlerBase implements IW
 	private double placementX, placementY, placementZ;
 	private double radius;
 	private double minDist, maxDist;
+	private double minRad, maxRad;
 
 	@Override
 	public boolean parseParameters(Object params) {
@@ -67,6 +68,9 @@ public class NavigationDecoratorImplementation extends HandlerBase implements IW
 		else
 			originZ = world.getSpawnPoint().getZ();
 		radius = nparams.getRandomPlacementProperties().getRadius().doubleValue();
+		if (nparams.isRandomizeRadius()) {
+			radius = (int) Math.random() * (maxRad - minRad) + minRad;
+		}
 		minDist = nparams.getMinRandomizedDistance().doubleValue();
 		maxDist = nparams.getMaxRandomizedDistance().doubleValue();
 		placementX = 0;
