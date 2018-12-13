@@ -43,7 +43,7 @@ import net.minecraft.util.ResourceLocation;
 public class ObservationFromCompassImplementation extends HandlerBase implements IObservationProducer {
 
 	@Override
-	public void writeObservationsToJSON(JsonObject compasJson, MissionInit missionInit) {
+	public void writeObservationsToJSON(JsonObject compassJson, MissionInit missionInit) {
 		EntityPlayerSP player = Minecraft.getMinecraft().player;
 		if (player == null)
 			return;
