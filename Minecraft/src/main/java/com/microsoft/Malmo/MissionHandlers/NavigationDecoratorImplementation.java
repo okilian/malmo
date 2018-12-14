@@ -67,10 +67,14 @@ public class NavigationDecoratorImplementation extends HandlerBase implements IW
 			originZ = nparams.getRandomPlacementProperties().getOrigin().getZ().doubleValue();
 		else
 			originZ = world.getSpawnPoint().getZ();
+
 		radius = nparams.getRandomPlacementProperties().getRadius().doubleValue();
-		if (nparams.isRandomizedRadius()) {
+		maxRad = nparams.getRandomPlacementProperties().getMinRandomizedRadius().doubleValue();
+		minRad = nparams.getRandomPlacementProperties().getMaxRandomizedRadius().doubleValue();
+		if (nparams.getRandomPlacementProperties().isRandomizedRadius()) {
 			radius = (int) (Math.random() * (maxRad - minRad) + minRad);
 		}
+		
 		minDist = nparams.getMinRandomizedDistance().doubleValue();
 		maxDist = nparams.getMaxRandomizedDistance().doubleValue();
 		placementX = 0;
