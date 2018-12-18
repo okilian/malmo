@@ -2428,7 +2428,7 @@
         <xs:complexType>
             <xs:attributeGroup ref="RewardProducerAttributes"/>
             <xs:attribute name="rewardPerBlock" type="xs:decimal" use="required"/>
-            <xs:attribute name="density" type="RewardDensityForTimeTaken" use="required"/>
+            <xs:attribute name="density" type="RewardDensityForDistanceTraveledToCompassTarget" use="required"/>
             <xs:attribute name="rewardDistribution" type="xs:string" use="optional" default="" />
         </xs:complexType>
     </xs:element>
