@@ -972,10 +972,17 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="radius" type="xs:decimal" minOccurs="1" maxOccurs="1">
+            <xs:element name="minRadius" type="xs:decimal" minOccurs="1" maxOccurs="1">
                 <xs:annotation>
                     <xs:documentation>
-                        Specifies the radius of the circle around which the block may be randomly placed.
+                        Specifies the minumum radius of the circle around which the block may be randomly placed.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="maxRadius" type="xs:decimal" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Specifies the maximum radius of the circle around which the block may be randomly placed.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
