@@ -8,17 +8,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.BlockPos;
 
-public class RewardForWalkingTwardsCompassTargetImplementation extends RewardBase
+public class RewardForDistanceTraveledToCompassTargetImplementation extends RewardBase
 {
-    RewardForWalkingTwardsCompassTarget params;
-    float previousDistance;
+    RewardForDistanceTraveledToCompassTarget params;
+    double previousDistance;
     float totalReward;
 
     @Override
     public boolean parseParameters(Object params)
     {
         super.parseParameters(params);
-        if (params == null || !(params instanceof RewardForWalkingTwardsCompassTarget))
+        if (params == null || !(params instanceof RewardForDistanceTraveledToCompassTarget))
             return false;
 
         this.params = (RewardForWalkingTwardsCompassTarget)params;
@@ -42,7 +42,8 @@ public class RewardForWalkingTwardsCompassTargetImplementation extends RewardBas
         BlockPos spawn = player.world.getSpawnPoint();
         BlockPos playerLoc = player.getPosition();
 
-        float delta = playerLoc.getDistance(spawn.getX(), spawn.getY(), spawn.getZ()) - previousDistance;
+        double currentDistance = playerLoc.getDistance(spawn.getX(), spawn.getY(), spawn.getZ());
+        float delta = (float)(currentDistance - previousDistance);
 
         switch (this.params.getDensity()) {
         case MISSION_END:
