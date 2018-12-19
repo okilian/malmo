@@ -21,7 +21,7 @@ public class RewardForDistanceTraveledToCompassTargetImplementation extends Rewa
         if (params == null || !(params instanceof RewardForDistanceTraveledToCompassTarget))
             return false;
 
-        this.params = (RewardForWalkingTwardsCompassTarget)params;
+        this.params = (RewardForDistanceTraveledToCompassTarget)params;
 
         EntityPlayerSP player = Minecraft.getMinecraft().player;
         BlockPos spawn = player.world.getSpawnPoint();
