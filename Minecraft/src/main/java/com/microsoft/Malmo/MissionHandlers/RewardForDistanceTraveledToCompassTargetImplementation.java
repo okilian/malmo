@@ -10,6 +10,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class RewardForDistanceTraveledToCompassTargetImplementation extends RewardBase
 {
+    // TODO implement saving initial distance for new reward method
     RewardForDistanceTraveledToCompassTarget params;
     double previousDistance;
     float totalReward;
@@ -43,7 +44,7 @@ public class RewardForDistanceTraveledToCompassTargetImplementation extends Rewa
         BlockPos playerLoc = player.getPosition();
 
         double currentDistance = playerLoc.getDistance(spawn.getX(), spawn.getY(), spawn.getZ());
-        float delta = (float)(currentDistance - previousDistance);
+        float delta = -1 * (float)(currentDistance - previousDistance);
 
         switch (this.params.getDensity()) {
         case MISSION_END:
