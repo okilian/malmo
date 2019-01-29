@@ -65,7 +65,7 @@ public class RewardForDistanceTraveledToCompassTargetImplementation extends Rewa
         }
 
         // Avoid sending large rewards as the result of an initial teleport event
-        if(delta < -0.0001 || 0.0001 < delta){
+        if(!this.positionInitialized && (delta < -0.0001 || 0.0001 < delta)){
             this.positionInitialized = true;
             this.totalReward = 0;
         }
