@@ -10,10 +10,10 @@ import net.minecraft.util.math.BlockPos;
 
 public class RewardForDistanceTraveledToCompassTargetImplementation extends RewardBase
 {
-    // TODO implement saving initial distance for new reward method
     RewardForDistanceTraveledToCompassTarget params;
     double previousDistance;
     float totalReward;
+    boolean positionInitialized;
 
     @Override
     public boolean parseParameters(Object params)
@@ -30,6 +30,7 @@ public class RewardForDistanceTraveledToCompassTargetImplementation extends Rewa
         this.previousDistance = playerLoc.getDistance(spawn.getX(), spawn.getY(), spawn.getZ());
 
         this.totalReward = 0;
+        this.positionInitialized = false;
 
         return true;
     }
@@ -61,6 +62,12 @@ public class RewardForDistanceTraveledToCompassTargetImplementation extends Rewa
             break;
         default:
             break;
+        }
+
+        # Avoid sending large rewards as the result of an initial teleport event
+        if(delta < -0.0001 || 0.0001 < delta){
+            this.positionInitialized = true;
+            adjusted_reward = 0
         }
 
         this.previousDistance = playerLoc.getDistance(spawn.getX(), spawn.getY(), spawn.getZ());
