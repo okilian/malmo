@@ -23,8 +23,14 @@ public class PauseTimer extends WrappedTimer {
     @Override
     public void updateTimer() {
         copy(this, state); // Save our current state
+
+
         super.updateTimer(); // Update current state
-        copy(state, this); // Restore our old state
+        if(TimeHelper.isPaused()){
+            this.renderPartialTicks = state.renderPartialTicks;
+        }
+
+        // System.out.println(this.elapsedTicks);
         // FML_BUS.post(new UpdatedEvent());
     }
 

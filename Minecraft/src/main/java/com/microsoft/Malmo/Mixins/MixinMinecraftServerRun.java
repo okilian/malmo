@@ -15,9 +15,11 @@ import org.apache.logging.log4j.LogManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.datafix.DataFixer;
@@ -27,27 +29,9 @@ import net.minecraftforge.client.MinecraftForgeClient;
 
 
 @Mixin(MinecraftServer.class)
-public abstract class MixinMinecraftServer  {
+public abstract class MixinMinecraftServerRun  {
     // /* Overrides methods within the MinecraftServer class.
     //  */
-    // public MixinMinecraftServer(
-    //     File anvilFileIn, 
-    //     Proxy proxyIn, 
-    //     DataFixer dataFixerIn,
-    //     YggdrasilAuthenticationService  authServiceIn, 
-    //     MinecraftSessionService sessionServiceIn, 
-    //     GameProfileRepository profileRepoIn, 
-    //     PlayerProfileCache profileCacheIn)
-    // {
-    //     super(anvilFileIn, 
-    //         proxyIn,
-    //         dataFixerIn,
-    //         authServiceIn,
-    //         sessionServiceIn,
-    //         profileRepoIn,
-    //         profileCacheIn
-    //     );
-    // }
 
     @Shadow private long currentTime;
     @Shadow private ServerStatusResponse statusResponse;
@@ -67,6 +51,7 @@ public abstract class MixinMinecraftServer  {
     @Shadow public abstract File getDataDirectory();
     @Shadow public abstract void stopServer();
     @Shadow public abstract void systemExitNow();
+    @Shadow public abstract void initiateShutdown();
 
     public void run()
     {
@@ -109,12 +94,16 @@ public abstract class MixinMinecraftServer  {
                     }
                     else
                     {
-                        while (i > TimeHelper.serverTickLength && !TimeHelper.isPaused())
+                        // In the future this mixin will allow synchronous stepping of the environment
+                        // And the simulator.
+                        while (i > TimeHelper.serverTickLength )
                         {
                             i -= TimeHelper.serverTickLength;
-                            this.tick();
+                            if( !TimeHelper.isPaused())  this.tick();
                         }
+
                     }
+                    
 
                     Thread.sleep(Math.max(1L, TimeHelper.serverTickLength - i));
                     this.serverIsRunning = true;
@@ -180,5 +169,4 @@ public abstract class MixinMinecraftServer  {
             }
         }
     }
-    
 }

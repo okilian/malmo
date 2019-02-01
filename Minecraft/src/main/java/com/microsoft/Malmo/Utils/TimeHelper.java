@@ -26,8 +26,10 @@ import net.minecraft.launchwrapper.Launch;
 import net.minecraft.util.Timer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -37,6 +39,8 @@ import net.minecraftforge.fml.relauncher.Side;
  * If the game is overclocked, this is no longer true, but generally it still makes sense to deal with a simple multiple of game ticks,
  * so we leave MillisecondsPerWorldTick unchanged.
  */
+
+@Mod.EventBusSubscriber
 public class TimeHelper
 {
     public final static float MillisecondsPerWorldTick = 50.0f;
@@ -136,18 +140,30 @@ public class TimeHelper
     {
         // * NOTE: In Minecraft 1.12 this changes; tickLength is the main mechanism 
         // for advancing ticks.
-        Minecraft.getMinecraft().timer = new Timer(ticksPerSecond);
+        Minecraft.getMinecraft().timer = new PauseTimer( new Timer(ticksPerSecond));
         
         return false;
     }
 
     static public void pause(){
-        // setMinecraftClientClockSpeed(0);
+        System.out.println("Pausing");
         paused = true;
     }
     
+    @SubscribeEvent
+    public static  void pauseClientTickHander(ClientTickEvent e){
+        if(e.phase == Phase.START){
+            Minecraft.getMinecraft().isGamePaused = paused || Minecraft.getMinecraft().isGamePaused();
+        }
+    }
+
+    @SubscribeEvent
+    public static void unpauseOnShutdown(net.minecraftforge.event.world.WorldEvent.Unload e){
+        unpause();
+    }
+
     static public void unpause(){
-        // setMinecraftClientClockSpeed(MillisecondsPerSecond / serverTickLength);
+        System.out.println("Unpausing");
         paused = false;
     }
 

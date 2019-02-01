@@ -9,7 +9,6 @@ import com.microsoft.Malmo.Utils.TimeHelper;
 
 public class PauseCommandImplementation extends CommandBase {
     public PauseCommandImplementation(){
-        System.out.println("Supppp BITCH");
     }
 
     @Override

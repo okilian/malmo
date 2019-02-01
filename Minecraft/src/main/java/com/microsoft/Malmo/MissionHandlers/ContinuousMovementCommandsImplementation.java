@@ -28,7 +28,6 @@ public class ContinuousMovementCommandsImplementation extends CommandGroup
 {
     public ContinuousMovementCommandsImplementation()
     {
-        System.out.println("poop");
         setShareParametersWithChildren(true);	// Pass our parameter block on to the following children:
         this.addCommandHandler(new CommandForAttackAndUseImplementation());
         this.addCommandHandler(new CommandForWheeledRobotNavigationImplementation());
