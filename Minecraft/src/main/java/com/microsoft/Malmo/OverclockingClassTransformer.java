@@ -64,9 +64,6 @@ public class OverclockingClassTransformer implements IClassTransformer
             
             switch (type)
             {
-            case SERVER:
-                overclockServer(cnode, isObfuscated);
-                break;
             case RENDERER:
                 overclockRenderer(cnode, isObfuscated);
                 break;
@@ -88,63 +85,6 @@ public class OverclockingClassTransformer implements IClassTransformer
         return serverClass;
     }
     
-    private static void overclockServer(ClassNode node, boolean isObfuscated)
-    {
-        // We're attempting to replace this code (from the heart of MinecraftServer.run):
-        /*       
-            {
-                while (i > 50L)
-                {
-                    i -= 50L;
-                    this.tick();
-                }
-            }
-    
-            Thread.sleep(Math.max(1L, 50L - i));
-        */
-
-        // With this:
-        /*       
-        {
-            while (i > TimeHelper.serverTickLength nad TimeHelper.notPaused)
-            {
-                i -= TimeHelper.serverTickLength;
-                this.tick();
-            }
-        }
-
-        Thread.sleep(Math.max(1L, TimeHelper.serverTickLength - i));
-    */
-        // This allows us to alter the tick length via TimeHelper.
-        // Further we are able to 
-        
-        
-        final String methodName = "run";
-        final String methodDescriptor = "()V"; // No params, returns void.
-
-        System.out.println("MALMO: Found MinecraftServer, attempting to transform it");
-
-        for (MethodNode method : node.methods)
-        {
-            if (method.name.equals(methodName) && method.desc.equals(methodDescriptor))
-            {
-                System.out.println("MALMO: Found MinecraftServer.run() method, attempting to transform it");
-                for (AbstractInsnNode instruction : method.instructions.toArray())
-                {
-                    if (instruction.getOpcode() == Opcodes.LDC)
-                    {
-                        Object cst = ((LdcInsnNode)instruction).cst;
-                        if ((cst instanceof Long) && (Long)cst == 50)
-                        {
-                            System.out.println("MALMO: Transforming LDC");
-                            AbstractInsnNode replacement = new FieldInsnNode(Opcodes.GETSTATIC, "com/microsoft/Malmo/Utils/TimeHelper", "serverTickLength", "J");
-                            method.instructions.set(instruction, replacement);
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     private static void removeInterpolation(ClassNode node, boolean isObfuscated)
     {
