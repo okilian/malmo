@@ -41,6 +41,7 @@ public class TimeHelper
 {
     public final static float MillisecondsPerWorldTick = 50.0f;
     public final static float MillisecondsPerSecond = 1000.0f;
+    private static Boolean paused = false;  //If ticking should be paused.
     public static long serverTickLength = 50;
     public static long displayGranularityMs = 0;  // How quickly we allow the Minecraft window to update.
     private static long lastUpdateTimeMs;
@@ -165,7 +166,18 @@ public class TimeHelper
         }
         return false;
     }
+
+    static public void pause(){
+        paused = true;
+    }
     
+    static public void unpause(){
+        paused = false;
+    }
+
+    static public Boolean isPaused(){
+        return paused;
+    }
     static public void updateDisplay()
     {
         long timeNow = System.currentTimeMillis();
