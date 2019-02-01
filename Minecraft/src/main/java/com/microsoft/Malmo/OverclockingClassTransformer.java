@@ -106,7 +106,7 @@ public class OverclockingClassTransformer implements IClassTransformer
         // With this:
         /*       
         {
-            while (i > TimeHelper.serverTickLength)
+            while (i > TimeHelper.serverTickLength nad TimeHelper.notPaused)
             {
                 i -= TimeHelper.serverTickLength;
                 this.tick();
@@ -116,6 +116,8 @@ public class OverclockingClassTransformer implements IClassTransformer
         Thread.sleep(Math.max(1L, TimeHelper.serverTickLength - i));
     */
         // This allows us to alter the tick length via TimeHelper.
+        // Further we are able to 
+        
         
         final String methodName = "run";
         final String methodDescriptor = "()V"; // No params, returns void.
@@ -180,6 +182,7 @@ public class OverclockingClassTransformer implements IClassTransformer
         // into this:
         //          TimeHelper.updateDisplay();
         // TimeHelper's method then decides whether or not to pass the call on to Minecraft.updateDisplay().
+        // This method is used for prioritizing offscreen rendering.
         
         final String methodName = isObfuscated ? "as" : "runGameLoop";
         final String methodDescriptor = "()V"; // No params, returns void.
