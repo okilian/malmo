@@ -63,7 +63,8 @@ public class OverclockingPlugin implements IFMLLoadingPlugin
     @Override
     public String[] getASMTransformerClass()
     {
-        return new String[]{"com.microsoft.Malmo.OverclockingClassTransformer"};
+        // return new String[]{"com.microsoft.Malmo.OverclockingClassTransformer"};
+        return new String[] {};
     }
 
     @Override

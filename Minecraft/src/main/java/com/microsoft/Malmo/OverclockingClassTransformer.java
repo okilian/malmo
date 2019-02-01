@@ -41,9 +41,9 @@ public class OverclockingClassTransformer implements IClassTransformer
         if (transformedName.startsWith("net.minecraft.client.entity"))
             System.out.println(transformedName);
         boolean isObfuscated = !name.equals(transformedName);
-        if (transformedName.equals("net.minecraft.server.MinecraftServer"))
-            return transform(basicClass, isObfuscated, transformType.SERVER);
-        else if (transformedName.equals("net.minecraft.client.Minecraft"))
+        // if (transformedName.equals("net.minecraft.server.MinecraftServer"))
+            // return transform(basicClass, isObfuscated, transformType.SERVER);
+        if (transformedName.equals("net.minecraft.client.Minecraft"))
             return transform(basicClass, isObfuscated, transformType.RENDERER);
         else if (transformedName.equals("net.minecraft.client.entity.EntityOtherPlayerMP"))
             return transform(basicClass, isObfuscated, transformType.OTHERPLAYER);
@@ -64,6 +64,9 @@ public class OverclockingClassTransformer implements IClassTransformer
             
             switch (type)
             {
+            case SERVER:
+                overclockServer(cnode, isObfuscated);
+                break;
             case RENDERER:
                 overclockRenderer(cnode, isObfuscated);
                 break;
@@ -84,7 +87,6 @@ public class OverclockingClassTransformer implements IClassTransformer
         }
         return serverClass;
     }
-    
 
     private static void removeInterpolation(ClassNode node, boolean isObfuscated)
     {

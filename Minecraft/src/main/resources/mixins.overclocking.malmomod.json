@@ -1,8 +1,11 @@
 {
     "required": true,
     "package": "com.microsoft.Malmo.Mixins",
-    "mixins": [],
-    "server": [],
+    "mixins": [
+      "MixinMinecraftServer"
+    ],
+    "server": [
+    ],
     "client": [
     ],
     "compatibilityLevel": "JAVA_8",
