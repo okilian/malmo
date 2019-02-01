@@ -142,6 +142,9 @@ public class TimeHelper
             timer = Minecraft.class.getDeclaredField(timerMemberName);
             timer.setAccessible(true);
             timer.set(Minecraft.getMinecraft(), new Timer(ticksPerSecond));
+            // Note to Malmo devs: When the timer comes out of sync with the new tick rate defined on 
+            // the MinecraftServer this can cause issues. Consider synchronizing ticking with a wrapped
+            // version of a timer.
             return true;
         }
         catch (SecurityException e)

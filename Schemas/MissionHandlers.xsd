@@ -187,9 +187,9 @@
                 <xs:annotation>
                     <xs:documentation>
                         The biome type for the world. Each chunk will be loaded with the biome specified.
-                        
+
                         If left blank, the world will be a normal survival world.
-                        
+
                         Biome ID #'s can be found here: https://minecraft.gamepedia.com/Biome#Biome_IDs
                     </xs:documentation>
                 </xs:annotation>
@@ -1032,7 +1032,9 @@
                     <xs:annotation>
                         <xs:documentation>
                             Sets whether or not the compass location should be randomized within a certain radius.
+
                             If false, will set the compass location to the block that was randomly placed.
+
                             If true, will set the compass location to a random spot within the radius specified below.
                         </xs:documentation>
                     </xs:annotation>
@@ -2007,7 +2009,6 @@
         </xs:annotation>
         <xs:complexType/>
     </xs:element>
-
 
     <xs:element name="ObservationFromCompass">
         <xs:annotation>
