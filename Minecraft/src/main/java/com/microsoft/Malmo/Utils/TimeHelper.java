@@ -45,6 +45,7 @@ public class TimeHelper
     public static long serverTickLength = 50;
     public static long displayGranularityMs = 0;  // How quickly we allow the Minecraft window to update.
     private static long lastUpdateTimeMs;
+    private static float currentTicksPerSecond = 0;
 
     /** Provide a means to measure the frequency of an event, over a rolling window.
      */
@@ -133,45 +134,20 @@ public class TimeHelper
     
     static public boolean setMinecraftClientClockSpeed(float ticksPerSecond)
     {
-        boolean devEnv = (Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
-        // We need to know, because the member name will either be obfuscated or not.
-        String timerMemberName = devEnv ? "timer" : "field_71428_T";
-        // NOTE: obfuscated name may need updating if Forge changes - search for "timer" in Malmo\Minecraft\build\tasklogs\retromapSources.log
-        Field timer;
-        try
-        {
-            timer = Minecraft.class.getDeclaredField(timerMemberName);
-            timer.setAccessible(true);
-            timer.set(Minecraft.getMinecraft(), new Timer(ticksPerSecond));
-            // Note to Malmo devs: When the timer comes out of sync with the new tick rate defined on 
-            // the MinecraftServer this can cause issues. Consider synchronizing ticking with a wrapped
-            // version of a timer.
-            return true;
-        }
-        catch (SecurityException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IllegalAccessException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IllegalArgumentException e)
-        {
-            e.printStackTrace();
-        }
-        catch (NoSuchFieldException e)
-        {
-            e.printStackTrace();
-        }
+        // * NOTE: In Minecraft 1.12 this changes; tickLength is the main mechanism 
+        // for advancing ticks.
+        Minecraft.getMinecraft().timer = new Timer(ticksPerSecond);
+        
         return false;
     }
 
     static public void pause(){
+        // setMinecraftClientClockSpeed(0);
         paused = true;
     }
     
     static public void unpause(){
+        // setMinecraftClientClockSpeed(MillisecondsPerSecond / serverTickLength);
         paused = false;
     }
 

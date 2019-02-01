@@ -55,7 +55,7 @@ public class OverclockingPlugin implements IFMLLoadingPlugin
             }
         } else {
             // LogManager.getLogger().warn("No CodeSource, if this is not a development environment we might run into problems!");
-            // LogManager.getLogger().warn(getClass().getProtectionDomain());
+        // LogManager.getLogger().warn(getClass().getProtectionDomain());
         }
 
     }
@@ -63,8 +63,8 @@ public class OverclockingPlugin implements IFMLLoadingPlugin
     @Override
     public String[] getASMTransformerClass()
     {
-        // return new String[]{"com.microsoft.Malmo.OverclockingClassTransformer"};
-        return new String[] {};
+        return new String[]{"com.microsoft.Malmo.OverclockingClassTransformer"};
+        // return new String[] {};
     }
 
     @Override

@@ -64,9 +64,6 @@ public class OverclockingClassTransformer implements IClassTransformer
             
             switch (type)
             {
-            case SERVER:
-                overclockServer(cnode, isObfuscated);
-                break;
             case RENDERER:
                 overclockRenderer(cnode, isObfuscated);
                 break;
