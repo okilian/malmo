@@ -219,3 +219,5 @@ Minecraft/Minecraft_Client.launch
 Minecraft/run
 Minecraft/.minecraft
 Minecraft/.minecraftserver
+Malmo/samples/Python_examples/.fuse_hidden*
+Malmo/samples/Python_examples/MalmoPython.so
