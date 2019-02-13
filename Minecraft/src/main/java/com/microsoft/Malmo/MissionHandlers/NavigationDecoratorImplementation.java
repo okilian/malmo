@@ -25,6 +25,7 @@ import com.microsoft.Malmo.MissionHandlerInterfaces.IWorldDecorator;
 import com.microsoft.Malmo.Schemas.MissionInit;
 import com.microsoft.Malmo.Schemas.NavigationDecorator;
 import com.microsoft.Malmo.Utils.MinecraftTypeHelper;
+
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
@@ -38,11 +39,14 @@ import net.minecraft.world.World;
  *
  */
 public class NavigationDecoratorImplementation extends HandlerBase implements IWorldDecorator {
+
 	private NavigationDecorator nparams;
+
 	private double originX, originY, originZ;
 	private double placementX, placementY, placementZ;
 	private double radius;
 	private double minDist, maxDist;
+	private double minRad, maxRad;
 
 	@Override
 	public boolean parseParameters(Object params) {
@@ -66,7 +70,11 @@ public class NavigationDecoratorImplementation extends HandlerBase implements IW
 			originZ = nparams.getRandomPlacementProperties().getOrigin().getZ().doubleValue();
 		else
 			originZ = world.getSpawnPoint().getZ();
-		radius = nparams.getRandomPlacementProperties().getRadius().doubleValue();
+
+		maxRad = nparams.getRandomPlacementProperties().getMaxRadius().doubleValue();
+		minRad = nparams.getRandomPlacementProperties().getMinRadius().doubleValue();
+		radius = (int) (Math.random() * (maxRad - minRad) + minRad);
+
 		minDist = nparams.getMinRandomizedDistance().doubleValue();
 		maxDist = nparams.getMaxRandomizedDistance().doubleValue();
 		placementX = 0;
