@@ -82,19 +82,21 @@ public class RewardForSmeltingItemImplementation extends RewardForItemBase
     }
 
     private void checkForMatch(ItemStack is) {
+        System.out.println("[REWARD] Checking stack " + is.getUnlocalizedName() + " " + is.getCount());
         int savedSmelted = getSmeltedItemCount(is);
+        System.out.println("[REWARD] Previous saved amount is " + savedSmelted);
         for (ItemMatcher matcher : this.matchers) {
             if (matcher.matches(is)) {
                 if (!params.isSparse()) {
                     if (savedSmelted != 0 && savedSmelted < matcher.matchSpec.getAmount()) {
                         for (int i = savedSmelted; i < matcher.matchSpec.getAmount()
                                 && i - savedSmelted < is.getCount(); i++) {
+                            System.out.println("Giving reward");
                             this.adjustAndDistributeReward(
                                     ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
                                     params.getDimension(),
                                     ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
                         }
-
                     } else if (savedSmelted != 0 && savedSmelted >= matcher.matchSpec.getAmount()) {
                         // Do nothing
                     } else {
