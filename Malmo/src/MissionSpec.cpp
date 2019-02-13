@@ -110,6 +110,7 @@ namespace malmo
             child.erase("FlatWorldGenerator");
             child.erase("FileWorldGenerator");
             child.erase("DefaultWorldGenerator");
+            child.erase("BiomeGenerator");
         }
     }
 
@@ -136,6 +137,11 @@ namespace malmo
         const auto& defaultWorldGenerator = mission.get_child_optional("Mission.ServerSection.ServerHandlers.DefaultWorldGenerator");
         if (defaultWorldGenerator) {
            defaultWorldGenerator.get().put("<xmlattr>.forceReset", true);
+        }
+        const auto& biomeWorldGenerator =
+        mission.get_child_optional("Mission.ServerSection.ServerHandlers.BiomeGenerator");
+        if (biomeWorldGenerator) {
+            biomeWorldGenerator.get().put("<xmlattr>.forceReset", true);
         }
     }
 
@@ -361,7 +367,7 @@ namespace malmo
     
     void MissionSpec::observeCompass()
     {
-        mission.put("mission.AgentSection.AgentHandlers.ObservationFromCompass", "");
+        mission.put("Mission.AgentSection.AgentHandlers.ObservationFromCompass", "");
     }
     
     // ------------------ settings for the agents : command handlers --------------------------------
@@ -376,6 +382,8 @@ namespace malmo
             child.erase("DiscreteMovementCommands");
             child.erase("AbsoluteMovementCommands");
             child.erase("SimpleCraftCommands");
+            child.erase("NearbyCraftCommands");
+            child.erase("NearbySmeltCommands");
             child.erase("ChatCommands");
             child.erase("MissionQuitCommands");
         }
@@ -522,6 +530,12 @@ namespace malmo
 
                 if (e.second.get_child_optional("AgentHandlers.SimpleCraftCommands"))
                     command_handlers.push_back("SimpleCraft");
+                
+                if (e.second.get_child_optional("AgentHandlers.NearbyCraftCommands"))
+                    command_handlers.push_back("NearbyCraft");
+                
+                if (e.second.get_child_optional("AgentHandlers.NearbySmeltCommands"))
+                    command_handlers.push_back("NearbySmelt");
 
                 if (e.second.get_child_optional("AgentHandlers.MissionQuitCommands"))
                     command_handlers.push_back("MissionQuit");
