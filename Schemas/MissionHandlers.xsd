@@ -1551,6 +1551,25 @@
         </xs:attribute>
     </xs:complexType>
 
+    <xs:complexType name="ItemListModifier">
+        <xs:annotation>
+            <xs:documentation>
+                Allow-list/deny-list item base class - designed to restrict agents from crafting
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="Item" type="BlockOrItemSpec" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:choice>
+        <xs:attribute name="type" use="optional" default="deny-list">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="deny-list"/>
+                    <xs:enumeration value="allow-list"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:complexType>
+
     <!-- The actual command handlers.-->
 
     <xs:element name="ContinuousMovementCommands">
@@ -1682,6 +1701,19 @@
                     </xs:complexType>
                 </xs:element>
             </xs:all>
+            <xs:element name="ItemList" minOccurs="0" maxOccurs="unbounded">
+                <xs:simpleType>
+                    <xs:list itemType="BlockOrItemSpec" />
+                </xs:simpleType>
+            </xs:element>
+            <xs:attribute name="type" use="optional" default="deny-list">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="deny-list"/>
+                        <xs:enumeration value="allow-list"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 
