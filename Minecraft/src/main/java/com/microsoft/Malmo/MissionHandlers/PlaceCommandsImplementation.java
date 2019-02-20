@@ -66,7 +66,6 @@ public class PlaceCommandsImplementation extends CommandBase implements ICommand
                 int selectedHotBarItem = inv.currentItem;
                 ItemStack selected = inv.getStackInSlot(selectedHotBarItem).copy();
                 inv.setInventorySlotContents(selectedHotBarItem, s);
-                inv.setInventorySlotContents(i, selected);
 
                 RayTraceResult mop = Minecraft.getMinecraft().objectMouseOver;
                 if (mop.typeOfHit == RayTraceResult.Type.BLOCK) {
@@ -96,6 +95,9 @@ public class PlaceCommandsImplementation extends CommandBase implements ICommand
                     }
                 }
                 foundBlock = true;
+
+                inv.setInventorySlotContents(i, inv.getCurrentItem());
+                inv.setInventorySlotContents(selectedHotBarItem, selected);
             }
         }
 
