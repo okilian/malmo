@@ -384,6 +384,7 @@ namespace malmo
             child.erase("SimpleCraftCommands");
             child.erase("NearbyCraftCommands");
             child.erase("NearbySmeltCommands");
+            child.erase("PlaceCommands");
             child.erase("ChatCommands");
             child.erase("MissionQuitCommands");
         }
@@ -432,6 +433,11 @@ namespace malmo
     void MissionSpec::allowAllChatCommands()
     {
         mission.put("Mission.AgentSection.AgentHandlers.ChatCommands", "");
+    }
+    
+    void MissionSpec::allowAllPlaceCommands()
+    {
+        mission.put("Mission.AgentSection.AgentHandlers.PlaceCommands", "");
     }
 
     // ------------------------------- information ---------------------------------------------------
@@ -536,6 +542,9 @@ namespace malmo
                 
                 if (e.second.get_child_optional("AgentHandlers.NearbySmeltCommands"))
                     command_handlers.push_back("NearbySmelt");
+                
+                if (e.second.get_child_optional("AgentHandlers.PlaceCommands"))
+                    command_handlers.push_back("Place");
 
                 if (e.second.get_child_optional("AgentHandlers.MissionQuitCommands"))
                     command_handlers.push_back("MissionQuit");

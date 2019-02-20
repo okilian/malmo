@@ -1066,9 +1066,7 @@
                     <xs:annotation>
                         <xs:documentation>
                             Sets whether or not the compass location should be randomized within a certain radius.
-
                             If false, will set the compass location to the block that was randomly placed.
-
                             If true, will set the compass location to a random spot within the radius specified below.
                         </xs:documentation>
                     </xs:annotation>
@@ -1464,6 +1462,27 @@
             <xs:enumeration value="craft" />
         </xs:restriction>
     </xs:simpleType>
+    
+    <xs:simpleType name="PlaceCommand">
+        <xs:annotation>
+            <xs:documentation>
+                A command for placing blocks in the agent's inventory:
+
+                Will look in the agent's inventory. If the block exists, will try to place the block in the world.
+
+                For basic objects, use BlockTypes found in Types.xsd. Eg:
+
+                "{{{place diamond_block}}}" will attempt to place a diamond block from the agent's inventory.
+
+                for more control over colours, types, etc, add a Variation or Colour. Eg:
+
+                "{{{place carpet PINK}}}"
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="place" />
+        </xs:restriction>
+    </xs:simpleType>
 
     <xs:simpleType name="ChatCommand">
         <xs:annotation>
@@ -1733,6 +1752,33 @@
                             <xs:restriction base="CommandListModifier">
                                 <xs:choice maxOccurs="unbounded">
                                     <xs:element name="command" type="SimpleCraftCommand" minOccurs="0" maxOccurs="unbounded"/>
+                                </xs:choice>
+                            </xs:restriction>
+                        </xs:complexContent>
+                    </xs:complexType>
+                </xs:element>
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+    
+    <xs:element name="PlaceCommands">
+        <xs:annotation>
+            <xs:documentation>
+                When present, the Mod will accept commands that allow for the placement of blocks. If the specified block is contained in the agent's inventory, then the agent will attempt to place the block in the world.
+            
+                If a non-block is specified, the command fails.
+            
+                If a block is specified, the block will swap to the hotbar, be placed, and then swapped back, so no changes to the inventory are made besides losing a block.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:all>
+                <xs:element name="ModifierList" minOccurs="0" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:complexContent>
+                            <xs:restriction base="CommandListModifier">
+                                <xs:choice maxOccurs="unbounded">
+                                    <xs:element name="command" type="PlaceCommand" minOccurs="0" maxOccurs="unbounded"/>
                                 </xs:choice>
                             </xs:restriction>
                         </xs:complexContent>
@@ -2109,6 +2155,7 @@
         </xs:annotation>
         <xs:complexType/>
     </xs:element>
+
 
     <xs:element name="ObservationFromCompass">
         <xs:annotation>
