@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import main.java.com.microsoft.Malmo.MissionHandlers.SimpleCraftNearbyCommandsImplementation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
@@ -65,6 +66,8 @@ import com.microsoft.Malmo.MissionHandlers.ObservationFromFullStatsImplementatio
 import com.microsoft.Malmo.MissionHandlers.ObservationFromGridImplementation;
 import com.microsoft.Malmo.MissionHandlers.ObservationFromSystemImplementation;
 import com.microsoft.Malmo.MissionHandlers.SimpleCraftCommandsImplementation;
+import com.microsoft.Malmo.MissionHandlers.NearbyCraftCommandsImplementation;
+import com.microsoft.Malmo.MissionHandlers.NearbySmeltCommandsImplementation;
 import com.microsoft.Malmo.Schemas.MissionInit;
 import com.microsoft.Malmo.Server.MalmoModServer;
 import com.microsoft.Malmo.Utils.AddressHelper;
@@ -134,6 +137,8 @@ public class MalmoMod
         network.registerMessage(ObservationFromGridImplementation.GridRequestMessageHandler.class, ObservationFromGridImplementation.GridRequestMessage.class, 2, Side.SERVER);
         network.registerMessage(MalmoMessageHandler.class, MalmoMessage.class, 3, Side.CLIENT);	// Malmo messages from server to client
         network.registerMessage(SimpleCraftCommandsImplementation.CraftMessageHandler.class, SimpleCraftCommandsImplementation.CraftMessage.class, 4, Side.SERVER);
+        network.registerMessage(NearbyCraftCommandsImplementation.CraftMessageHandler.class, NearbyCraftCommandsImplementation.CraftMessage.class, 4, Side.SERVER);
+        network.registerMessage(NearbySmeltCommandsImplementation.CraftMessageHandler.class, NearbySmeltCommandsImplementation.CraftMessage.class, 4, Side.SERVER);
         network.registerMessage(AbsoluteMovementCommandsImplementation.TeleportMessageHandler.class, AbsoluteMovementCommandsImplementation.TeleportMessage.class, 5, Side.SERVER);
         network.registerMessage(MalmoMessageHandler.class, MalmoMessage.class, 6, Side.SERVER);	// Malmo messages from client to server
         network.registerMessage(InventoryCommandsImplementation.InventoryMessageHandler.class, InventoryCommandsImplementation.InventoryMessage.class, 7, Side.SERVER);

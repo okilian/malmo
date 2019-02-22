@@ -1462,6 +1462,37 @@
             <xs:enumeration value="craft" />
         </xs:restriction>
     </xs:simpleType>
+
+
+    <xs:simpleType name="SimpleCraftNearbyCommand">
+        <xs:annotation>
+            <xs:documentation>
+                A command for simple nearby crafting:
+
+                "{{{craftNearby carpet PINK}}}"
+
+                etc.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="craftNearby" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="SimpleSmeltNearbyCommand">
+        <xs:annotation>
+            <xs:documentation>
+                A command for simple smelting:
+
+                "{{{smelt carpet PINK}}}"
+
+                etc.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="smeltNearby" />
+        </xs:restriction>
+    </xs:simpleType>
     
     <xs:simpleType name="PlaceCommand">
         <xs:annotation>
@@ -1721,7 +1752,7 @@
                         <xs:complexContent>
                             <xs:restriction base="CommandListModifier">
                                 <xs:choice maxOccurs="unbounded">
-                                    <xs:element name="command" type="SimpleCraftCommand" minOccurs="0" maxOccurs="unbounded"/>
+                                    <xs:element name="command" type="SimpleCraftNearbyCommand" minOccurs="0" maxOccurs="unbounded"/>
                                 </xs:choice>
                             </xs:restriction>
                         </xs:complexContent>
@@ -1730,16 +1761,16 @@
             </xs:all>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="NearbySmeltCommands">
         <xs:annotation>
             <xs:documentation>
                 When present, the Mod will accept simple commands that implement a basic form of smelting. Success of the smelt command depends on the presence of a nearby furnace previously placed by the agent and within reach and in field of view. Fails when a command corresponds to an item not able to be smelted. Each command takes fuel as if the agent had placed the items in a furnace.
-                
+
                 Eg:
-                
+
                 If called on 16 iron ore, requires 2 coal, 2 charcoal, 11 planks, etc.
-                
+
                 If called twice separately on 8 iron ore, requires 1 coal and then 1 coal, etc.
             </xs:documentation>
         </xs:annotation>
@@ -1751,7 +1782,7 @@
                         <xs:complexContent>
                             <xs:restriction base="CommandListModifier">
                                 <xs:choice maxOccurs="unbounded">
-                                    <xs:element name="command" type="SimpleCraftCommand" minOccurs="0" maxOccurs="unbounded"/>
+                                    <xs:element name="command" type="SimpleSmeltNearbyCommand" minOccurs="0" maxOccurs="unbounded"/>
                                 </xs:choice>
                             </xs:restriction>
                         </xs:complexContent>
@@ -1760,7 +1791,7 @@
             </xs:all>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="PlaceCommands">
         <xs:annotation>
             <xs:documentation>

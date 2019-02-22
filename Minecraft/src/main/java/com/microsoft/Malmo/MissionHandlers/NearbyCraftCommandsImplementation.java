@@ -39,7 +39,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import com.microsoft.Malmo.MalmoMod;
 import com.microsoft.Malmo.Schemas.MissionInit;
-import com.microsoft.Malmo.Schemas.SimpleCraftCommand;
+import com.microsoft.Malmo.Schemas.NearbyCraftCommand;
 import com.microsoft.Malmo.Schemas.NearbyCraftCommands;
 import com.microsoft.Malmo.Utils.CraftingHelper;
 
@@ -143,7 +143,7 @@ public class NearbyCraftCommandsImplementation extends CommandBase {
 
     @Override
     protected boolean onExecute(String verb, String parameter, MissionInit missionInit) {
-        if (verb.equalsIgnoreCase(SimpleCraftCommand.CRAFT.value())) {
+        if (verb.equalsIgnoreCase(NearbyCraftCommand.CRAFT.value())) {
             MalmoMod.network.sendToServer(new CraftMessage(parameter));
             return true;
         }
