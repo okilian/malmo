@@ -6,10 +6,10 @@
            xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
            elementFormDefault="qualified"
            jaxb:version="2.1"
-           version="${MALMO_VERSION_MAJOR}.${MALMO_VERSION_MINOR}">
+           version="0.37">
 
     <xs:include schemaLocation="Types.xsd" />
-    <xs:include schemaLocation="Mission.xsd" /> 
+    <xs:include schemaLocation="Mission.xsd" />
 
     <xs:complexType name="Pos">
         <xs:annotation>
@@ -1257,9 +1257,9 @@
 
                 "{{{strafe -1}}}" - start moving left at 100% of the normal walking speed (-ve = left, +ve = right).
 
-                "{{{pitch 0.1}}}" - start tilting the agent's head down at 10% of the maximum speed (-ve = up, +ve = down). The maximum speed is set by {{{turnSpeedDegs}}} in {{{ContinuousMovementCommands}}}. 
+                "{{{pitch 0.1}}}" - start tilting the agent's head down at 10% of the maximum speed (-ve = up, +ve = down). The maximum speed is set by {{{turnSpeedDegs}}} in {{{ContinuousMovementCommands}}}.
 
-                "{{{turn 0.1}}}" - start turning right at 10% of the maximum speed (-ve = anti-clockwise/left, +ve = clockwise/right). The maximum speed is set by {{{turnSpeedDegs}}} in {{{ContinuousMovementCommands}}}. 
+                "{{{turn 0.1}}}" - start turning right at 10% of the maximum speed (-ve = anti-clockwise/left, +ve = clockwise/right). The maximum speed is set by {{{turnSpeedDegs}}} in {{{ContinuousMovementCommands}}}.
 
                 "{{{jump 1}}}" - start jumping (1 = start, 0 = stop).
 
@@ -1267,7 +1267,7 @@
 
                 "{{{attack 1}}}" - start attacking (1 = start, 0 = stop). The 'attack' command is for destroying blocks and attacking mobs.
 
-                "{{{use 1}}}" - start 'use'ing (1 = start, 0 = stop). The 'use' command is for placing blocks and for other things too.        
+                "{{{use 1}}}" - start 'use'ing (1 = start, 0 = stop). The 'use' command is for placing blocks and for other things too.
             </xs:documentation>
         </xs:annotation>
         <xs:restriction base="xs:string">
@@ -1401,10 +1401,10 @@
 
                 To select a hotbar slot:
 
-                "{{{hotbar.1 1}}}" 
-                "{{{hotbar.1 0}}}" 
+                "{{{hotbar.1 1}}}"
+                "{{{hotbar.1 0}}}"
 
-                Send both commands to select hotbar slot 1 as the currently-held tool. This affects the attack and use commands 
+                Send both commands to select hotbar slot 1 as the currently-held tool. This affects the attack and use commands
                 - e.g. if the agent does 'use' while holding a block item it will place the block into the world.
 
                 If the agent is currently pointed at a container item - eg a chest, shulker box, dispenser etc - then the swap and combine commands
@@ -1415,7 +1415,7 @@
 
                 "{{{swapInventoryItems 3 Chest:0}}}"
 
-                Note that this is the same as writing 
+                Note that this is the same as writing
 
                 "{{{swapInventoryItems Inventory:3 Chest:0}}}"
 
@@ -1445,14 +1445,6 @@
             <xs:documentation>
                 A command for simple crafting:
 
-                Will look up all recipes that produce the requested object, and attempt each one in turn until one is successful or all have failed. This ignores all issues like requiring a crafting table / brewing stand etc, and the shape of the recipe (which items go in which slots on the crafting table). It will simply check to see whether the player has the necessary raw ingredients, and, if so, will remove them from the player's inventory and add the result of the recipe.
-
-                For basic objects, use the ItemTypes or BlockTypes found in Types.xsd. Eg:
-
-                "{{{craft diamond_pickaxe}}}" will remove three diamonds and two sticks from the player's inventory, and add a diamond pickaxe.
-
-                For more control over colours, types etc, add a Variation or Colour. Eg:
-
                 "{{{craft carpet PINK}}}"
 
                 etc.
@@ -1463,8 +1455,7 @@
         </xs:restriction>
     </xs:simpleType>
 
-
-    <xs:simpleType name="SimpleCraftNearbyCommand">
+    <xs:simpleType name="NearbyCraftCommand">
         <xs:annotation>
             <xs:documentation>
                 A command for simple nearby crafting:
@@ -1479,12 +1470,12 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="SimpleSmeltNearbyCommand">
+    <xs:simpleType name="NearbySmeltCommand">
         <xs:annotation>
             <xs:documentation>
                 A command for simple smelting:
 
-                "{{{smelt carpet PINK}}}"
+                "{{{smeltNearby carpet PINK}}}"
 
                 etc.
             </xs:documentation>
@@ -1493,7 +1484,7 @@
             <xs:enumeration value="smeltNearby" />
         </xs:restriction>
     </xs:simpleType>
-    
+
     <xs:simpleType name="PlaceCommand">
         <xs:annotation>
             <xs:documentation>
@@ -1577,7 +1568,7 @@
     </xs:simpleType>
 
     <xs:simpleType name="Command">
-        <xs:union memberTypes="ContinuousMovementCommand AbsoluteMovementCommand DiscreteMovementCommand InventoryCommand ChatCommand SimpleCraftCommand MissionQuitCommand HumanLevelCommand"/>
+        <xs:union memberTypes="ContinuousMovementCommand AbsoluteMovementCommand DiscreteMovementCommand InventoryCommand ChatCommand SimpleCraftCommand NearbyCraftCommand NearbySmeltCommand MissionQuitCommand HumanLevelCommand"/>
     </xs:simpleType>
 
     <xs:simpleType name="CommandList">
@@ -1737,7 +1728,7 @@
             </xs:all>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="NearbyCraftCommands">
         <xs:annotation>
             <xs:documentation>
@@ -1752,7 +1743,7 @@
                         <xs:complexContent>
                             <xs:restriction base="CommandListModifier">
                                 <xs:choice maxOccurs="unbounded">
-                                    <xs:element name="command" type="SimpleCraftNearbyCommand" minOccurs="0" maxOccurs="unbounded"/>
+                                    <xs:element name="command" type="NearbyCraftCommand" minOccurs="0" maxOccurs="unbounded"/>
                                 </xs:choice>
                             </xs:restriction>
                         </xs:complexContent>
@@ -1782,7 +1773,7 @@
                         <xs:complexContent>
                             <xs:restriction base="CommandListModifier">
                                 <xs:choice maxOccurs="unbounded">
-                                    <xs:element name="command" type="SimpleSmeltNearbyCommand" minOccurs="0" maxOccurs="unbounded"/>
+                                    <xs:element name="command" type="NearbySmeltCommand" minOccurs="0" maxOccurs="unbounded"/>
                                 </xs:choice>
                             </xs:restriction>
                         </xs:complexContent>

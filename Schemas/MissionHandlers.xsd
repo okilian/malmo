@@ -1455,7 +1455,7 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="CraftNearbyCommand">
+    <xs:simpleType name="NearbyCraftCommand">
         <xs:annotation>
             <xs:documentation>
                 A command for simple nearby crafting:
@@ -1470,7 +1470,7 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="SmeltNearbyCommand">
+    <xs:simpleType name="NearbySmeltCommand">
         <xs:annotation>
             <xs:documentation>
                 A command for simple smelting:
@@ -1568,7 +1568,7 @@
     </xs:simpleType>
 
     <xs:simpleType name="Command">
-        <xs:union memberTypes="ContinuousMovementCommand AbsoluteMovementCommand DiscreteMovementCommand InventoryCommand ChatCommand SimpleCraftCommand SimpleCraftNearbyCommand SimpleSmeltNearbyCommand MissionQuitCommand HumanLevelCommand"/>
+        <xs:union memberTypes="ContinuousMovementCommand AbsoluteMovementCommand DiscreteMovementCommand InventoryCommand ChatCommand SimpleCraftCommand NearbyCraftCommand NearbySmeltCommand MissionQuitCommand HumanLevelCommand"/>
     </xs:simpleType>
 
     <xs:simpleType name="CommandList">
