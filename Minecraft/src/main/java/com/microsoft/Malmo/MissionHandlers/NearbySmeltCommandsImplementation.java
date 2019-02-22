@@ -38,8 +38,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import com.microsoft.Malmo.MalmoMod;
 import com.microsoft.Malmo.Schemas.MissionInit;
-import com.microsoft.Malmo.Schemas.SimpleCraftCommand;
-import com.microsoft.Malmo.Schemas.NearbyCraftCommands;
+import com.microsoft.Malmo.Schemas.NearbySmeltCommand;
+import com.microsoft.Malmo.Schemas.NearbySmeltCommands;
 import com.microsoft.Malmo.Utils.CraftingHelper;
 
 /**
@@ -141,7 +141,7 @@ public class NearbySmeltCommandsImplementation extends CommandBase {
 
     @Override
     protected boolean onExecute(String verb, String parameter, MissionInit missionInit) {
-        if (verb.equalsIgnoreCase(SimpleCraftCommand.CRAFT.value())) {
+        if (verb.equalsIgnoreCase(NearbySmeltCommand.CRAFT.value())) {
             MalmoMod.network.sendToServer(new CraftMessage(parameter));
             return true;
         }
@@ -152,10 +152,10 @@ public class NearbySmeltCommandsImplementation extends CommandBase {
     public boolean parseParameters(Object params) {
         furnaces = new ArrayList<BlockPos>();
 
-        if (!(params instanceof NearbyCraftCommands))
+        if (!(params instanceof NearbySmeltCommands))
             return false;
 
-        NearbyCraftCommands cParams = (NearbyCraftCommands) params;
+        NearbySmeltCommands cParams = (NearbySmeltCommands) params;
         setUpAllowAndDenyLists(cParams.getModifierList());
         return true;
     }

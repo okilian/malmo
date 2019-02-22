@@ -382,8 +382,8 @@ namespace malmo
             child.erase("DiscreteMovementCommands");
             child.erase("AbsoluteMovementCommands");
             child.erase("SimpleCraftCommands");
-            child.erase("NearbyCraftCommands");
-            child.erase("NearbySmeltCommands");
+            child.erase("SimpleCraftCraftCommands");
+            child.erase("SimpleSmeltCommands");
             child.erase("PlaceCommands");
             child.erase("ChatCommands");
             child.erase("MissionQuitCommands");
