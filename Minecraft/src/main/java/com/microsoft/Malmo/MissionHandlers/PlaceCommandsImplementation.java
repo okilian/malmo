@@ -20,6 +20,9 @@
 package com.microsoft.Malmo.MissionHandlers;
 
 import com.microsoft.Malmo.Schemas.*;
+import com.microsoft.Malmo.Schemas.MissionInit;
+import com.microsoft.Malmo.Schemas.NearbySmeltCommand;
+import com.microsoft.Malmo.Schemas.NearbySmeltCommands;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -51,7 +54,7 @@ public class PlaceCommandsImplementation extends CommandBase implements ICommand
         if (player == null)
             return false;
 
-        if (!verb.equalsIgnoreCase(PlaceCommand.PLACE.value()))
+        if (!verb.equalsIgnoreCase("place"))
             return false;
 
         InventoryPlayer inv = player.inventory;
