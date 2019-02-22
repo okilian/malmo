@@ -386,6 +386,8 @@ namespace malmo
             static const std::vector<std::string> all_discrete_movement_commands;
             static const std::vector<std::string> all_inventory_commands;
             static const std::vector<std::string> all_simplecraft_commands;
+            static const std::vector<std::string> all_nearbycraft_commands;
+            static const std::vector<std::string> all_nearbysmelt_commands;
             static const std::vector<std::string> all_chat_commands;
             static const std::vector<std::string> all_mission_quit_commands;
             static const std::vector<std::string> all_human_level_commands;

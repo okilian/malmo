@@ -40,7 +40,7 @@ namespace malmo
         "hotbar.1", "hotbar.2", "hotbar.3", "hotbar.4", "hotbar.5", "hotbar.6", "hotbar.7", "hotbar.8", "hotbar.9" };
     const std::vector<std::string> MissionSpec::all_simplecraft_commands = { "craft" };
     const std::vector<std::string> MissionSpec::all_nearbycraft_commands = { "craftNearby" };
-    const std::vector<std::string> MissionSpec::all_nearbysmelt_commands = { "semlt" };
+    const std::vector<std::string> MissionSpec::all_nearbysmelt_commands = { "smeltNearby" };
     const std::vector<std::string> MissionSpec::all_chat_commands = { "chat" };
     const std::vector<std::string> MissionSpec::all_mission_quit_commands = { "quit" };
     const std::vector<std::string> MissionSpec::all_human_level_commands = { "forward", "left", "right", "jump", "sneak", "sprint", "inventory", "swapHands", "drop", "use", "attack", "moveMouse", 
