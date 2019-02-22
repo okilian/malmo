@@ -608,10 +608,10 @@ namespace malmo
                         allowed_commands = all_simplecraft_commands;
                     }
                     else if (command_handler == "NearbyCraft") {
-                        allowed_commands = all_simplecraft_commands;
+                        allowed_commands = all_nearbycraft_commands;
                     }
                     else if (command_handler == "NearbySmelt") {
-                        allowed_commands = all_simplecraft_commands;
+                        allowed_commands = all_nearbysmelt_commands;
                     }
                     else if (command_handler == "Chat") {
                         allowed_commands = all_chat_commands;
