@@ -1466,7 +1466,7 @@
             </xs:documentation>
         </xs:annotation>
         <xs:restriction base="xs:string">
-            <xs:enumeration value="craft_nearby" />
+            <xs:enumeration value="craftNearby" />
         </xs:restriction>
     </xs:simpleType>
 
@@ -1481,7 +1481,7 @@
             </xs:documentation>
         </xs:annotation>
         <xs:restriction base="xs:string">
-            <xs:enumeration value="smelt_nearby" />
+            <xs:enumeration value="smeltNearby" />
         </xs:restriction>
     </xs:simpleType>
 
