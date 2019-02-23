@@ -52,13 +52,13 @@ public class NearbyCraftCommandsImplementation extends CommandBase {
     private boolean isOverriding;
     private static ArrayList<BlockPos> craftingTables;
 
-    public static class CraftMessage implements IMessage {
+    public static class CraftNearbyMessage implements IMessage {
         String parameters;
 
-        public CraftMessage() {
+        public CraftNearbyMessage() {
         }
 
-        public CraftMessage(String parameters) {
+        public CraftNearbyMessage(String parameters) {
             this.parameters = parameters;
         }
 
@@ -87,9 +87,9 @@ public class NearbyCraftCommandsImplementation extends CommandBase {
                     craftingTables.remove(i);
     }
 
-    public static class CraftMessageHandler implements IMessageHandler<CraftMessage, IMessage> {
+    public static class CraftNearbyMessageHandler implements IMessageHandler<CraftNearbyMessage, IMessage> {
         @Override
-        public IMessage onMessage(CraftMessage message, MessageContext ctx) {
+        public IMessage onMessage(CraftNearbyMessage message, MessageContext ctx) {
             EntityPlayerMP player = ctx.getServerHandler().playerEntity;
             Vec3d headPos = new Vec3d(player.posX, player.posY + 1.6, player.posZ);
 
@@ -144,7 +144,7 @@ public class NearbyCraftCommandsImplementation extends CommandBase {
     @Override
     protected boolean onExecute(String verb, String parameter, MissionInit missionInit) {
         if (verb.equalsIgnoreCase("craftNearby")) {
-            MalmoMod.network.sendToServer(new CraftMessage(parameter));
+            MalmoMod.network.sendToServer(new CraftNearbyMessage(parameter));
             return true;
         }
         return false;
