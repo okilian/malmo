@@ -384,8 +384,8 @@ namespace malmo
             child.erase("DiscreteMovementCommands");
             child.erase("AbsoluteMovementCommands");
             child.erase("SimpleCraftCommands");
-            child.erase("SimpleCraftCraftCommands");
-            child.erase("SimpleSmeltCommands");
+            child.erase("NearbyCraftCommands");
+            child.erase("NearbySmeltCommands");
             child.erase("PlaceCommands");
             child.erase("ChatCommands");
             child.erase("MissionQuitCommands");
@@ -431,7 +431,7 @@ namespace malmo
     {
         addVerbToCommandType(verb, "Mission.AgentSection.AgentHandlers.InventoryCommands");
     }
-   
+
     void MissionSpec::allowAllChatCommands()
     {
         mission.put("Mission.AgentSection.AgentHandlers.ChatCommands", "");

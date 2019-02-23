@@ -127,8 +127,8 @@ public class MalmoMod
         network.registerMessage(ObservationFromGridImplementation.GridRequestMessageHandler.class, ObservationFromGridImplementation.GridRequestMessage.class, 2, Side.SERVER);
         network.registerMessage(MalmoMessageHandler.class, MalmoMessage.class, 3, Side.CLIENT);	// Malmo messages from server to client
         network.registerMessage(SimpleCraftCommandsImplementation.CraftMessageHandler.class, SimpleCraftCommandsImplementation.CraftMessage.class, 4, Side.SERVER);
-        network.registerMessage(NearbyCraftCommandsImplementation.CraftNearbyMessageHandler.class, NearbyCraftCommandsImplementation.CraftNearbyMessage.class, 4, Side.SERVER);
-        network.registerMessage(NearbySmeltCommandsImplementation.SmeltNearbyMessageHandler.class, NearbySmeltCommandsImplementation.SmeltNearbyMessage.class, 4, Side.SERVER);
+        network.registerMessage(NearbyCraftCommandsImplementation.CraftNearbyMessageHandler.class, NearbyCraftCommandsImplementation.CraftNearbyMessage.class, 13, Side.SERVER);
+        network.registerMessage(NearbySmeltCommandsImplementation.SmeltNearbyMessageHandler.class, NearbySmeltCommandsImplementation.SmeltNearbyMessage.class, 14, Side.SERVER);
         network.registerMessage(AbsoluteMovementCommandsImplementation.TeleportMessageHandler.class, AbsoluteMovementCommandsImplementation.TeleportMessage.class, 5, Side.SERVER);
         network.registerMessage(MalmoMessageHandler.class, MalmoMessage.class, 6, Side.SERVER);	// Malmo messages from client to server
         network.registerMessage(InventoryCommandsImplementation.InventoryMessageHandler.class, InventoryCommandsImplementation.InventoryMessage.class, 7, Side.SERVER);
