@@ -338,7 +338,7 @@ public class CraftingHelper
             if (obj instanceof IRecipe)
             {
                 ItemStack is = ((IRecipe)obj).getRecipeOutput();
-                if (is == null)
+                if (is == null || target == null)
                     continue;
                 if (ItemStack.areItemsEqual(is, target))
                 {
