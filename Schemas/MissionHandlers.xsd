@@ -9,7 +9,7 @@
            version="0.37">
 
     <xs:include schemaLocation="Types.xsd" />
-    <xs:include schemaLocation="Mission.xsd" /> 
+    <xs:include schemaLocation="Mission.xsd" />
 
     <xs:complexType name="Pos">
         <xs:annotation>
@@ -1257,9 +1257,9 @@
 
                 "{{{strafe -1}}}" - start moving left at 100% of the normal walking speed (-ve = left, +ve = right).
 
-                "{{{pitch 0.1}}}" - start tilting the agent's head down at 10% of the maximum speed (-ve = up, +ve = down). The maximum speed is set by {{{turnSpeedDegs}}} in {{{ContinuousMovementCommands}}}. 
+                "{{{pitch 0.1}}}" - start tilting the agent's head down at 10% of the maximum speed (-ve = up, +ve = down). The maximum speed is set by {{{turnSpeedDegs}}} in {{{ContinuousMovementCommands}}}.
 
-                "{{{turn 0.1}}}" - start turning right at 10% of the maximum speed (-ve = anti-clockwise/left, +ve = clockwise/right). The maximum speed is set by {{{turnSpeedDegs}}} in {{{ContinuousMovementCommands}}}. 
+                "{{{turn 0.1}}}" - start turning right at 10% of the maximum speed (-ve = anti-clockwise/left, +ve = clockwise/right). The maximum speed is set by {{{turnSpeedDegs}}} in {{{ContinuousMovementCommands}}}.
 
                 "{{{jump 1}}}" - start jumping (1 = start, 0 = stop).
 
@@ -1267,7 +1267,7 @@
 
                 "{{{attack 1}}}" - start attacking (1 = start, 0 = stop). The 'attack' command is for destroying blocks and attacking mobs.
 
-                "{{{use 1}}}" - start 'use'ing (1 = start, 0 = stop). The 'use' command is for placing blocks and for other things too.        
+                "{{{use 1}}}" - start 'use'ing (1 = start, 0 = stop). The 'use' command is for placing blocks and for other things too.
             </xs:documentation>
         </xs:annotation>
         <xs:restriction base="xs:string">
@@ -1401,10 +1401,10 @@
 
                 To select a hotbar slot:
 
-                "{{{hotbar.1 1}}}" 
-                "{{{hotbar.1 0}}}" 
+                "{{{hotbar.1 1}}}"
+                "{{{hotbar.1 0}}}"
 
-                Send both commands to select hotbar slot 1 as the currently-held tool. This affects the attack and use commands 
+                Send both commands to select hotbar slot 1 as the currently-held tool. This affects the attack and use commands
                 - e.g. if the agent does 'use' while holding a block item it will place the block into the world.
 
                 If the agent is currently pointed at a container item - eg a chest, shulker box, dispenser etc - then the swap and combine commands
@@ -1415,7 +1415,7 @@
 
                 "{{{swapInventoryItems 3 Chest:0}}}"
 
-                Note that this is the same as writing 
+                Note that this is the same as writing
 
                 "{{{swapInventoryItems Inventory:3 Chest:0}}}"
 
@@ -1484,7 +1484,7 @@
             <xs:enumeration value="smeltNearby" />
         </xs:restriction>
     </xs:simpleType>
-    
+
     <xs:simpleType name="PlaceCommand">
         <xs:annotation>
             <xs:documentation>
@@ -1728,7 +1728,7 @@
             </xs:all>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="NearbyCraftCommands">
         <xs:annotation>
             <xs:documentation>
@@ -1752,16 +1752,16 @@
             </xs:all>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="NearbySmeltCommands">
         <xs:annotation>
             <xs:documentation>
                 When present, the Mod will accept simple commands that implement a basic form of smelting. Success of the smelt command depends on the presence of a nearby furnace previously placed by the agent and within reach and in field of view. Fails when a command corresponds to an item not able to be smelted. Each command takes fuel as if the agent had placed the items in a furnace.
-                
+
                 Eg:
-                
+
                 If called on 16 iron ore, requires 2 coal, 2 charcoal, 11 planks, etc.
-                
+
                 If called twice separately on 8 iron ore, requires 1 coal and then 1 coal, etc.
             </xs:documentation>
         </xs:annotation>
@@ -1782,7 +1782,7 @@
             </xs:all>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="PlaceCommands">
         <xs:annotation>
             <xs:documentation>

@@ -19,26 +19,20 @@
 
 package com.microsoft.Malmo.MissionHandlers;
 
+import com.microsoft.Malmo.MalmoMod;
 import com.microsoft.Malmo.Schemas.*;
 import com.microsoft.Malmo.Schemas.MissionInit;
-import com.microsoft.Malmo.Schemas.NearbySmeltCommand;
-import com.microsoft.Malmo.Schemas.NearbySmeltCommands;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 
 import com.microsoft.Malmo.MissionHandlerInterfaces.ICommandHandler;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.common.MinecraftForge;
 
 /**
  * @author Cayden Codel, Carnegie Mellon University
@@ -56,6 +50,44 @@ public class PlaceCommandsImplementation extends CommandBase implements ICommand
 
         if (!verb.equalsIgnoreCase("place"))
             return false;
+
+        Item item = Item.getByNameOrId(parameter);
+        Block block = Block.getBlockFromItem(item);
+        if (item == null || item.getRegistryName() == null || block.getRegistryName() == null)
+            return false;
+
+        InventoryPlayer inv = player.inventory;
+        boolean blockInInventory = false;
+        ItemStack stackInInventory = null;
+        int stackIndex = -1;
+        for (int i = 0; !blockInInventory && i < inv.getSizeInventory(); i++) {
+            Item stack = inv.getStackInSlot(i).getItem();
+            if (stack.getRegistryName() != null && stack.getRegistryName().equals(item.getRegistryName())) {
+                stackInInventory = inv.getStackInSlot(i);
+                stackIndex = i;
+                blockInInventory = true;
+            }
+        }
+
+        // We don't have that item in our inventories
+        if (!blockInInventory)
+            return false;
+
+        RayTraceResult mop = Minecraft.getMinecraft().objectMouseOver;
+        if (mop.typeOfHit == RayTraceResult.Type.BLOCK) {
+            BlockPos pos = mop.getBlockPos().add(mop.sideHit.getDirectionVec());
+            // Can we place this block here?
+            AxisAlignedBB axisalignedbb = block.getDefaultState().getCollisionBoundingBox(player.world, pos);
+            if (axisalignedbb == null || player.world.checkNoEntityCollision(axisalignedbb.offset(pos), null)) {
+                MalmoMod.network.sendToServer(new DiscreteMovementCommandsImplementation.UseActionMessage(mop.getBlockPos(), new ItemStack(block), mop.sideHit, false, mop.hitVec));
+                if (stackInInventory.getCount() == 1)
+                    inv.setInventorySlotContents(stackIndex, new ItemStack(Block.getBlockById(0)));
+                else
+                    stackInInventory.setCount(stackInInventory.getCount() - 1);
+            }
+        }
+
+        /*
 
         InventoryPlayer inv = player.inventory;
         Block b = Block.getBlockFromName(parameter);
@@ -103,6 +135,7 @@ public class PlaceCommandsImplementation extends CommandBase implements ICommand
 //                inv.setInventorySlotContents(selectedHotBarItem, selected);
             }
         }
+        */
 
         return true;
     }
