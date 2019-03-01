@@ -27,6 +27,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
@@ -42,6 +43,7 @@ import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -349,6 +351,9 @@ public class DiscreteMovementCommandsImplementation extends CommandBase implemen
                             // Trigger a block break event
                             BlockEvent.BreakEvent breakEvent = new BlockEvent.BreakEvent(player.world, hitPos, iblockstate, player);
                             MinecraftForge.EVENT_BUS.post(breakEvent);
+
+                            PlayerEvent.ItemPickupEvent pickupEvent = new PlayerEvent.ItemPickupEvent();
+                            EntityItem foo = new EntityItem();
                         }
                     }
                     handled = true;

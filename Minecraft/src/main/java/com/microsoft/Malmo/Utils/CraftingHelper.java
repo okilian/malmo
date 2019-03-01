@@ -445,6 +445,9 @@ public class CraftingHelper
             ItemStack resultForInventory = is.copy();
             ItemStack resultForReward = is.copy();
             player.inventory.addItemStackToInventory(resultForInventory);
+
+
+
             List<IRecipe> recipes = getRecipesForRequestedOutput(resultForReward);
             boolean foundShaped = false;
             for (int i = 0; i < recipes.size(); i++) {
