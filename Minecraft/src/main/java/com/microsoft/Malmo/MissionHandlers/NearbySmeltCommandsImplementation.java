@@ -141,7 +141,7 @@ public class NearbySmeltCommandsImplementation extends CommandBase {
 
     @Override
     protected boolean onExecute(String verb, String parameter, MissionInit missionInit) {
-        if (verb.equalsIgnoreCase("smeltNearby")) {
+        if (verb.equalsIgnoreCase(NearbySmeltCommand.SMELT_NEARBY.value())) {
             MalmoMod.network.sendToServer(new SmeltNearbyMessage(parameter));
             return true;
         }
