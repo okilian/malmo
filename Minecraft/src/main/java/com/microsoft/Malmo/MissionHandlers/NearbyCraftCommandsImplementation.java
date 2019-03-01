@@ -19,6 +19,7 @@
 
 package com.microsoft.Malmo.MissionHandlers;
 
+import com.microsoft.Malmo.Schemas.NearbyCraftCommand;
 import io.netty.buffer.ByteBuf;
 
 import java.util.ArrayList;
@@ -26,10 +27,13 @@ import java.util.List;
 
 import net.minecraft.block.BlockWorkbench;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -39,7 +43,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import com.microsoft.Malmo.MalmoMod;
 import com.microsoft.Malmo.Schemas.MissionInit;
-import com.microsoft.Malmo.Schemas.NearbyCraftCommand;
 import com.microsoft.Malmo.Schemas.NearbyCraftCommands;
 import com.microsoft.Malmo.Utils.CraftingHelper;
 
@@ -51,6 +54,14 @@ import com.microsoft.Malmo.Utils.CraftingHelper;
 public class NearbyCraftCommandsImplementation extends CommandBase {
     private boolean isOverriding;
     private static ArrayList<BlockPos> craftingTables;
+
+    @SubscribeEvent
+    public void onJump(LivingEvent.LivingJumpEvent event) {
+        if (event.getEntity() instanceof EntityPlayerSP) {
+            System.out.println("Jump! Attempting to craft sticks.");
+            onExecute("craftNearby", "wooden_pickaxe", null);
+        }
+    }
 
     public static class CraftNearbyMessage implements IMessage {
         String parameters;
@@ -130,20 +141,23 @@ public class NearbyCraftCommandsImplementation extends CommandBase {
             }
 
             if (closeTable) {
+                System.out.println("We are close enough to the table");
                 // We are close enough, try crafting recipes
                 List<IRecipe> matching_recipes = CraftingHelper.getRecipesForRequestedOutput(message.parameters);
                 for (IRecipe recipe : matching_recipes)
                     if (CraftingHelper.attemptCrafting(player, recipe))
                         return null;
-            }
+            } else
+                System.out.println("We are not close enough to a table");
 
+            System.out.println("Either didn't have the requisite materials or weren't close enough to a table");
             return null;
         }
     }
 
     @Override
     protected boolean onExecute(String verb, String parameter, MissionInit missionInit) {
-        if (verb.equalsIgnoreCase("craftNearby")) {
+        if (verb.equalsIgnoreCase(NearbyCraftCommand.CRAFT_NEARBY.value())) {
             MalmoMod.network.sendToServer(new CraftNearbyMessage(parameter));
             return true;
         }
@@ -165,10 +179,12 @@ public class NearbyCraftCommandsImplementation extends CommandBase {
     @Override
     public void install(MissionInit missionInit) {
         CraftingHelper.reset();
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     @Override
     public void deinstall(MissionInit missionInit) {
+        MinecraftForge.EVENT_BUS.unregister(this);
     }
 
     @Override

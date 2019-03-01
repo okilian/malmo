@@ -2,16 +2,13 @@ package com.microsoft.Malmo.MissionHandlers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
-import com.microsoft.Malmo.MalmoMod;
-import com.microsoft.Malmo.MalmoMod.IMalmoMessageListener;
-import com.microsoft.Malmo.MalmoMod.MalmoMessageType;
 import com.microsoft.Malmo.MissionHandlerInterfaces.IRewardProducer;
 import com.microsoft.Malmo.Schemas.BlockOrItemSpecWithReward;
 import com.microsoft.Malmo.Schemas.MissionInit;
 import com.microsoft.Malmo.Schemas.RewardForCraftingItem;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -23,20 +20,15 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
  * Sends a reward when the agent crafts the specified item with
  * specified amounts.
  */
-public class RewardForCraftingItemImplementation extends RewardForItemBase
-        implements IRewardProducer, IMalmoMessageListener {
-
+public class RewardForCraftingItemImplementation extends RewardForItemBase implements IRewardProducer {
     private RewardForCraftingItem params;
     private ArrayList<ItemMatcher> matchers;
     private HashMap<String, Integer> craftedItems;
-    private boolean callCraft = true;
 
     @SubscribeEvent
     public void onItemCraft(PlayerEvent.ItemCraftedEvent event) {
-        if (callCraft)
+        if (event.player instanceof EntityPlayerMP && !event.crafting.isEmpty())
             checkForMatch(event.crafting);
-
-        callCraft = !callCraft;
     }
 
     /**
@@ -95,10 +87,7 @@ public class RewardForCraftingItemImplementation extends RewardForItemBase
                                         params.getDimension(),
                                         ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
                             }
-
-                        } else if (savedCrafted != 0 && savedCrafted >= matcher.matchSpec.getAmount()) {
-                            // Do nothing
-                        } else {
+                        } else if (savedCrafted == 0) {
                             for (int i = 0; i < is.getCount() && i < matcher.matchSpec.getAmount(); i++) {
                                 this.adjustAndDistributeReward(
                                         ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
@@ -140,7 +129,6 @@ public class RewardForCraftingItemImplementation extends RewardForItemBase
     public void prepare(MissionInit missionInit) {
         super.prepare(missionInit);
         MinecraftForge.EVENT_BUS.register(this);
-        MalmoMod.MalmoMessageHandler.registerForMessage(this, MalmoMessageType.SERVER_COLLECTITEM);
         craftedItems = new HashMap<String, Integer>();
     }
 
@@ -153,10 +141,5 @@ public class RewardForCraftingItemImplementation extends RewardForItemBase
     public void cleanup() {
         super.cleanup();
         MinecraftForge.EVENT_BUS.unregister(this);
-        MalmoMod.MalmoMessageHandler.deregisterForMessage(this, MalmoMessageType.SERVER_COLLECTITEM);
-    }
-
-    @Override
-    public void onMessage(MalmoMessageType messageType, Map<String, String> data) {
     }
 }

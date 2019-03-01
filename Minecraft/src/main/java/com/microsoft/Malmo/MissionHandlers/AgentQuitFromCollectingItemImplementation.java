@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
@@ -14,12 +15,12 @@ import com.microsoft.Malmo.MissionHandlers.RewardForCollectingItemImplementation
 import com.microsoft.Malmo.Schemas.AgentQuitFromCollectingItem;
 import com.microsoft.Malmo.Schemas.BlockOrItemSpecWithDescription;
 import com.microsoft.Malmo.Schemas.MissionInit;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
  * Quits the mission when the agent has collected the right amount of items. The count on the item collection is absolute.
  */
 public class AgentQuitFromCollectingItemImplementation extends HandlerBase implements IWantToQuit {
-
     private AgentQuitFromCollectingItem params;
     private HashMap<String, Integer> collectedItems;
     private List<ItemQuitMatcher> matchers;
@@ -74,15 +75,26 @@ public class AgentQuitFromCollectingItemImplementation extends HandlerBase imple
 
     @SubscribeEvent
     public void onGainItem(GainItemEvent event) {
-        checkForMatch(event.stack);
+        if (event.stack != null)
+            checkForMatch(event.stack);
     }
 
     @SubscribeEvent
     public void onPickupItem(EntityItemPickupEvent event) {
-        if (event.getItem() != null) {
-            ItemStack stack = event.getItem().getEntityItem();
-            checkForMatch(stack);
-        }
+        if (event.getItem() != null && event.getEntityPlayer() instanceof EntityPlayerMP)
+            checkForMatch(event.getItem().getEntityItem());
+    }
+
+    @SubscribeEvent
+    public void onItemCraft(PlayerEvent.ItemCraftedEvent event) {
+        if (event.player instanceof EntityPlayerMP && !event.crafting.isEmpty())
+            checkForMatch(event.crafting);
+    }
+
+    @SubscribeEvent
+    public void onItemSmelt(PlayerEvent.ItemSmeltedEvent event) {
+        if (event.player instanceof EntityPlayerMP && !event.smelting.isEmpty())
+            checkForMatch(event.smelting);
     }
 
     /**

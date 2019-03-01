@@ -2,19 +2,12 @@ package com.microsoft.Malmo.MissionHandlers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
-import com.microsoft.Malmo.MalmoMod;
-import com.microsoft.Malmo.MalmoMod.IMalmoMessageListener;
-import com.microsoft.Malmo.MalmoMod.MalmoMessageType;
 import com.microsoft.Malmo.MissionHandlerInterfaces.IRewardProducer;
 import com.microsoft.Malmo.Schemas.BlockOrItemSpecWithReward;
 import com.microsoft.Malmo.Schemas.MissionInit;
 import com.microsoft.Malmo.MissionHandlers.RewardForDiscardingItemImplementation.LoseItemEvent;
 import com.microsoft.Malmo.Schemas.RewardForPossessingItem;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -23,11 +16,8 @@ import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
 import net.minecraftforge.event.world.BlockEvent.PlaceEvent;
-import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-
-import javax.xml.bind.DatatypeConverter;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
  * @author Cayden Codel, Carnegie Mellon University
@@ -35,27 +25,33 @@ import javax.xml.bind.DatatypeConverter;
  * Sends a reward when the agent possesses the specified item with
  * specified amounts. The counter is relative, meaning it goes down if items are placed, lost, or destroyed.
  */
-public class RewardForPossessingItemImplementation extends RewardForItemBase
-        implements IRewardProducer, IMalmoMessageListener {
-
+public class RewardForPossessingItemImplementation extends RewardForItemBase implements IRewardProducer {
     private RewardForPossessingItem params;
     private ArrayList<ItemMatcher> matchers;
     private HashMap<String, Integer> collectedItems;
 
     @SubscribeEvent
-    public void onPickupItem(EntityItemPickupEvent event) {
-        if (event.getItem() != null) {
-            checkForMatch(event.getItem().getEntityItem());
-            if (event.getEntityPlayer() instanceof EntityPlayerMP)
-                sendItemStackToClient((EntityPlayerMP) event.getEntityPlayer(), MalmoMessageType.SERVER_COLLECTITEM, event.getItem().getEntityItem());
-        }
+    public void onGainItem(RewardForCollectingItemImplementation.GainItemEvent event) {
+        if (event.stack != null)
+            checkForMatch(event.stack);
     }
 
     @SubscribeEvent
-    public void onGainItem(GainItemEvent event) {
-        if (event.stack != null) {
-            accumulateReward(this.params.getDimension(), event.stack);
-        }
+    public void onPickupItem(EntityItemPickupEvent event) {
+        if (event.getItem() != null && event.getEntityPlayer() instanceof EntityPlayerMP)
+            checkForMatch(event.getItem().getEntityItem());
+    }
+
+    @SubscribeEvent
+    public void onItemCraft(PlayerEvent.ItemCraftedEvent event) {
+        if (event.player instanceof EntityPlayerMP && !event.crafting.isEmpty())
+            checkForMatch(event.crafting);
+    }
+
+    @SubscribeEvent
+    public void onItemSmelt(PlayerEvent.ItemSmeltedEvent event) {
+        if (event.player instanceof EntityPlayerMP && !event.smelting.isEmpty())
+            checkForMatch(event.smelting);
     }
 
     @SubscribeEvent
@@ -66,20 +62,20 @@ public class RewardForPossessingItemImplementation extends RewardForItemBase
 
     @SubscribeEvent
     public void onDropItem(ItemTossEvent event) {
-        removeCollectedItemCount(event.getEntityItem().getEntityItem());
+        if (event.getPlayer() instanceof EntityPlayerMP)
+            removeCollectedItemCount(event.getEntityItem().getEntityItem());
     }
 
     @SubscribeEvent
     public void onDestroyItem(PlayerDestroyItemEvent event) {
-        removeCollectedItemCount(event.getOriginal());
+        if (event.getEntityPlayer() instanceof EntityPlayerMP)
+            removeCollectedItemCount(event.getOriginal());
     }
 
     @SubscribeEvent
     public void onBlockPlace(PlaceEvent event) {
-        if (!event.isCanceled() && event.getPlacedBlock() != null) {
-            ItemStack stack = new ItemStack(event.getPlacedBlock().getBlock());
-            removeCollectedItemCount(stack);
-        }
+        if (!event.isCanceled() && event.getPlacedBlock() != null && event.getPlayer() instanceof EntityPlayerMP)
+            removeCollectedItemCount(new ItemStack(event.getPlacedBlock().getBlock()));
     }
 
     /**
@@ -150,9 +146,7 @@ public class RewardForPossessingItemImplementation extends RewardForItemBase
                                         ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
                             }
 
-                        } else if (savedCollected != 0 && savedCollected >= matcher.matchSpec.getAmount()) {
-                            // Do nothing
-                        } else {
+                        } else if (savedCollected == 0) {
                             for (int i = 0; i < is.getCount() && i < matcher.matchSpec.getAmount(); i++) {
                                 this.adjustAndDistributeReward(
                                         ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
@@ -194,7 +188,6 @@ public class RewardForPossessingItemImplementation extends RewardForItemBase
     public void prepare(MissionInit missionInit) {
         super.prepare(missionInit);
         MinecraftForge.EVENT_BUS.register(this);
-        MalmoMod.MalmoMessageHandler.registerForMessage(this, MalmoMessageType.SERVER_COLLECTITEM);
         collectedItems = new HashMap<String, Integer>();
     }
 
@@ -207,26 +200,5 @@ public class RewardForPossessingItemImplementation extends RewardForItemBase
     public void cleanup() {
         super.cleanup();
         MinecraftForge.EVENT_BUS.unregister(this);
-        MalmoMod.MalmoMessageHandler.deregisterForMessage(this, MalmoMessageType.SERVER_COLLECTITEM);
-    }
-
-    @Override
-    public void onMessage(MalmoMessageType messageType, Map<String, String> data) {
-        String buffString = data.get("message");
-        ByteBuf buf = Unpooled.copiedBuffer(DatatypeConverter.parseBase64Binary(buffString));
-        ItemStack itemStack = ByteBufUtils.readItemStack(buf);
-        if (itemStack != null) {
-            accumulateReward(this.params.getDimension(), itemStack);
-        } else {
-            System.out.println("Error - couldn't understand the itemstack we received.");
-        }
-    }
-
-    public static class GainItemEvent extends Event {
-        public final ItemStack stack;
-
-        public GainItemEvent(ItemStack stack) {
-            this.stack = stack;
-        }
     }
 }

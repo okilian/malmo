@@ -2,27 +2,19 @@ package com.microsoft.Malmo.MissionHandlers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
-import com.microsoft.Malmo.MalmoMod;
-import com.microsoft.Malmo.MalmoMod.IMalmoMessageListener;
-import com.microsoft.Malmo.MalmoMod.MalmoMessageType;
 import com.microsoft.Malmo.MissionHandlerInterfaces.IRewardProducer;
 import com.microsoft.Malmo.Schemas.BlockOrItemSpecWithReward;
 import com.microsoft.Malmo.Schemas.MissionInit;
 import com.microsoft.Malmo.Schemas.RewardForCollectingItem;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-
-import javax.xml.bind.DatatypeConverter;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
  * @author Cayden Codel, Carnegie Mellon University
@@ -30,27 +22,33 @@ import javax.xml.bind.DatatypeConverter;
  * Sends a reward when the agent collected the specified item with
  * specified amounts. Counter is absolute.
  */
-public class RewardForCollectingItemImplementation extends RewardForItemBase
-        implements IRewardProducer, IMalmoMessageListener {
-
+public class RewardForCollectingItemImplementation extends RewardForItemBase implements IRewardProducer {
     private RewardForCollectingItem params;
     private ArrayList<ItemMatcher> matchers;
     private HashMap<String, Integer> craftedItems;
 
     @SubscribeEvent
-    public void onPickupItem(EntityItemPickupEvent event) {
-        if (event.getItem() != null) {
-            checkForMatch(event.getItem().getEntityItem());
-            if (event.getEntityPlayer() instanceof EntityPlayerMP)
-                sendItemStackToClient((EntityPlayerMP) event.getEntityPlayer(), MalmoMessageType.SERVER_COLLECTITEM, event.getItem().getEntityItem());
-        }
+    public void onGainItem(RewardForCollectingItemImplementation.GainItemEvent event) {
+        if (event.stack != null)
+            checkForMatch(event.stack);
     }
 
     @SubscribeEvent
-    public void onGainItem(GainItemEvent event) {
-        if (event.stack != null) {
-            accumulateReward(this.params.getDimension(), event.stack);
-        }
+    public void onPickupItem(EntityItemPickupEvent event) {
+        if (event.getItem() != null && event.getEntityPlayer() instanceof EntityPlayerMP)
+            checkForMatch(event.getItem().getEntityItem());
+    }
+
+    @SubscribeEvent
+    public void onItemCraft(PlayerEvent.ItemCraftedEvent event) {
+        if (event.player instanceof EntityPlayerMP && !event.crafting.isEmpty())
+            checkForMatch(event.crafting);
+    }
+
+    @SubscribeEvent
+    public void onItemSmelt(PlayerEvent.ItemSmeltedEvent event) {
+        if (event.player instanceof EntityPlayerMP && !event.smelting.isEmpty())
+            checkForMatch(event.smelting);
     }
 
     /**
@@ -110,9 +108,7 @@ public class RewardForCollectingItemImplementation extends RewardForItemBase
                                         ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
                             }
 
-                        } else if (savedCollected != 0 && savedCollected >= matcher.matchSpec.getAmount()) {
-                            // Do nothing
-                        } else {
+                        } else if (savedCollected == 0) {
                             for (int i = 0; i < is.getCount() && i < matcher.matchSpec.getAmount(); i++) {
                                 this.adjustAndDistributeReward(
                                         ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
@@ -154,7 +150,6 @@ public class RewardForCollectingItemImplementation extends RewardForItemBase
     public void prepare(MissionInit missionInit) {
         super.prepare(missionInit);
         MinecraftForge.EVENT_BUS.register(this);
-        MalmoMod.MalmoMessageHandler.registerForMessage(this, MalmoMessageType.SERVER_COLLECTITEM);
         craftedItems = new HashMap<String, Integer>();
     }
 
@@ -167,26 +162,22 @@ public class RewardForCollectingItemImplementation extends RewardForItemBase
     public void cleanup() {
         super.cleanup();
         MinecraftForge.EVENT_BUS.unregister(this);
-        MalmoMod.MalmoMessageHandler.deregisterForMessage(this, MalmoMessageType.SERVER_COLLECTITEM);
-    }
-
-    @Override
-    public void onMessage(MalmoMessageType messageType, Map<String, String> data) {
-        String buffString = data.get("message");
-        ByteBuf buf = Unpooled.copiedBuffer(DatatypeConverter.parseBase64Binary(buffString));
-        ItemStack itemStack = ByteBufUtils.readItemStack(buf);
-        if (itemStack != null) {
-            accumulateReward(this.params.getDimension(), itemStack);
-        } else {
-            System.out.println("Error - couldn't understand the itemstack we received.");
-        }
     }
 
     public static class GainItemEvent extends Event {
         public final ItemStack stack;
 
+        /**
+         * Sets the cause of the GainItemEvent. By default, is 0. If it is from auto-crafting, then is 1. If it is from auto-smelting, then is 2.
+         */
+        public int cause = 0;
+
         public GainItemEvent(ItemStack stack) {
             this.stack = stack;
+        }
+
+        public void setCause(int cause) {
+            this.cause = cause;
         }
     }
 }

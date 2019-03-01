@@ -25,10 +25,13 @@ import java.util.ArrayList;
 
 import net.minecraft.block.BlockFurnace;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -50,6 +53,14 @@ import com.microsoft.Malmo.Utils.CraftingHelper;
 public class NearbySmeltCommandsImplementation extends CommandBase {
     private boolean isOverriding;
     private static ArrayList<BlockPos> furnaces;
+
+    @SubscribeEvent
+    public void onJump(LivingEvent.LivingJumpEvent event) {
+        if (event.getEntity() instanceof EntityPlayerMP) {
+            System.out.println("Jump! Attempting to smelt.");
+            onExecute("smeltNearby", "iron_ingot", null);
+        }
+    }
 
     public static class SmeltNearbyMessage implements IMessage {
         String parameters;
@@ -163,10 +174,12 @@ public class NearbySmeltCommandsImplementation extends CommandBase {
     @Override
     public void install(MissionInit missionInit) {
         CraftingHelper.reset();
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     @Override
     public void deinstall(MissionInit missionInit) {
+        MinecraftForge.EVENT_BUS.unregister(this);
     }
 
     @Override

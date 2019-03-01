@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -14,6 +15,8 @@ import com.microsoft.Malmo.MissionHandlers.RewardForItemBase.ItemMatcher;
 import com.microsoft.Malmo.Schemas.AgentQuitFromSmeltingItem;
 import com.microsoft.Malmo.Schemas.BlockOrItemSpecWithDescription;
 import com.microsoft.Malmo.Schemas.MissionInit;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * @author Cayden Codel, Carnegie Mellon University
@@ -21,13 +24,11 @@ import com.microsoft.Malmo.Schemas.MissionInit;
  * Gives agents rewards when items are smelted. Handles variants and colors.
  */
 public class AgentQuitFromSmeltingItemImplementation extends HandlerBase implements IWantToQuit {
-
     private AgentQuitFromSmeltingItem params;
     private HashMap<String, Integer> smeltedItems;
     private List<ItemQuitMatcher> matchers;
     private String quitCode = "";
     private boolean wantToQuit = false;
-    private int callSmelt = 0;
 
     public static class ItemQuitMatcher extends RewardForItemBase.ItemMatcher {
         String description;
@@ -76,11 +77,10 @@ public class AgentQuitFromSmeltingItemImplementation extends HandlerBase impleme
     }
 
     @SubscribeEvent
+    @SideOnly(Side.CLIENT)
     public void onItemSmelt(PlayerEvent.ItemSmeltedEvent event) {
-        if (callSmelt % 4 == 0)
+        if (event.player instanceof EntityPlayerMP && !event.smelting.isEmpty())
             checkForMatch(event.smelting);
-
-        callSmelt = (callSmelt + 1) % 4;
     }
 
     /**
@@ -112,7 +112,6 @@ public class AgentQuitFromSmeltingItemImplementation extends HandlerBase impleme
         else
             return (smeltedItems.get(is.getItem().getUnlocalizedName()) == null) ? 0
                     : smeltedItems.get(is.getItem().getUnlocalizedName());
-
     }
 
     private void addSmeltedItemCount(ItemStack is) {

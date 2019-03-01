@@ -2,11 +2,7 @@ package com.microsoft.Malmo.MissionHandlers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
-import com.microsoft.Malmo.MalmoMod;
-import com.microsoft.Malmo.MalmoMod.IMalmoMessageListener;
-import com.microsoft.Malmo.MalmoMod.MalmoMessageType;
 import com.microsoft.Malmo.MissionHandlerInterfaces.IRewardProducer;
 import com.microsoft.Malmo.Schemas.BlockOrItemSpecWithReward;
 import com.microsoft.Malmo.Schemas.MissionInit;
@@ -23,8 +19,7 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
  * Sends a reward when the agent smelts the specified item with
  * specified amounts.
  */
-public class RewardForSmeltingItemImplementation extends RewardForItemBase
-        implements IRewardProducer, IMalmoMessageListener {
+public class RewardForSmeltingItemImplementation extends RewardForItemBase implements IRewardProducer {
 
     private RewardForSmeltingItem params;
     private ArrayList<ItemMatcher> matchers;
@@ -97,9 +92,7 @@ public class RewardForSmeltingItemImplementation extends RewardForItemBase
                                     params.getDimension(),
                                     ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
                         }
-                    } else if (savedSmelted != 0 && savedSmelted >= matcher.matchSpec.getAmount()) {
-                        // Do nothing
-                    } else {
+                    } else if (savedSmelted == 0) {
                         for (int i = 0; i < is.getCount() && i < matcher.matchSpec.getAmount(); i++) {
                             System.out.println("Giving reward");
                             this.adjustAndDistributeReward(
@@ -142,7 +135,6 @@ public class RewardForSmeltingItemImplementation extends RewardForItemBase
     public void prepare(MissionInit missionInit) {
         super.prepare(missionInit);
         MinecraftForge.EVENT_BUS.register(this);
-        MalmoMod.MalmoMessageHandler.registerForMessage(this, MalmoMessageType.SERVER_COLLECTITEM);
         craftedItems = new HashMap<String, Integer>();
     }
 
@@ -155,10 +147,5 @@ public class RewardForSmeltingItemImplementation extends RewardForItemBase
     public void cleanup() {
         super.cleanup();
         MinecraftForge.EVENT_BUS.unregister(this);
-        MalmoMod.MalmoMessageHandler.deregisterForMessage(this, MalmoMessageType.SERVER_COLLECTITEM);
-    }
-
-    @Override
-    public void onMessage(MalmoMessageType messageType, Map<String, String> data) {
     }
 }

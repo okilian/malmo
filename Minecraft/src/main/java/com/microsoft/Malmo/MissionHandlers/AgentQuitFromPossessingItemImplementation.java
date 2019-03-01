@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.microsoft.Malmo.Schemas.AgentQuitFromPossessingItem;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
@@ -18,6 +19,7 @@ import com.microsoft.Malmo.MissionHandlers.RewardForCollectingItemImplementation
 import com.microsoft.Malmo.MissionHandlers.RewardForDiscardingItemImplementation.LoseItemEvent;
 import com.microsoft.Malmo.Schemas.BlockOrItemSpecWithDescription;
 import com.microsoft.Malmo.Schemas.MissionInit;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
  * @author Cayden Codel, Carnegie Mellon University
@@ -27,9 +29,8 @@ import com.microsoft.Malmo.Schemas.MissionInit;
  * In order to quit the mission, the agent must have the requisite items in its inventory all at one time.
  */
 public class AgentQuitFromPossessingItemImplementation extends HandlerBase implements IWantToQuit {
-
     private AgentQuitFromPossessingItem params;
-    private HashMap<String, Integer> collectedItems;
+    private HashMap<String, Integer> possessedItems;
     private List<ItemQuitMatcher> matchers;
     private String quitCode = "";
     private boolean wantToQuit = false;
@@ -72,7 +73,7 @@ public class AgentQuitFromPossessingItemImplementation extends HandlerBase imple
     @Override
     public void prepare(MissionInit missionInit) {
         MinecraftForge.EVENT_BUS.register(this);
-        collectedItems = new HashMap<String, Integer>();
+        possessedItems = new HashMap<String, Integer>();
     }
 
     @Override
@@ -82,13 +83,26 @@ public class AgentQuitFromPossessingItemImplementation extends HandlerBase imple
 
     @SubscribeEvent
     public void onGainItem(GainItemEvent event) {
-        checkForMatch(event.stack);
+        if (event.stack != null)
+            checkForMatch(event.stack);
     }
 
     @SubscribeEvent
     public void onPickupItem(EntityItemPickupEvent event) {
-        if (event.getItem() != null)
+        if (event.getItem() != null && event.getEntityPlayer() instanceof EntityPlayerMP)
             checkForMatch(event.getItem().getEntityItem());
+    }
+
+    @SubscribeEvent
+    public void onItemCraft(PlayerEvent.ItemCraftedEvent event) {
+        if (event.player instanceof EntityPlayerMP && !event.crafting.isEmpty())
+            checkForMatch(event.crafting);
+    }
+
+    @SubscribeEvent
+    public void onItemSmelt(PlayerEvent.ItemSmeltedEvent event) {
+        if (event.player instanceof EntityPlayerMP && !event.smelting.isEmpty())
+            checkForMatch(event.smelting);
     }
 
     @SubscribeEvent
@@ -99,20 +113,20 @@ public class AgentQuitFromPossessingItemImplementation extends HandlerBase imple
 
     @SubscribeEvent
     public void onDropItem(ItemTossEvent event) {
-        removeCollectedItemCount(event.getEntityItem().getEntityItem());
+        if (event.getPlayer() instanceof EntityPlayerMP)
+            removeCollectedItemCount(event.getEntityItem().getEntityItem());
     }
 
     @SubscribeEvent
     public void onDestroyItem(PlayerDestroyItemEvent event) {
-        removeCollectedItemCount(event.getOriginal());
+        if (event.getEntityPlayer() instanceof EntityPlayerMP)
+            removeCollectedItemCount(event.getOriginal());
     }
 
     @SubscribeEvent
     public void onBlockPlace(PlaceEvent event) {
-        if (!event.isCanceled() && event.getPlacedBlock() != null) {
-            ItemStack stack = new ItemStack(event.getPlacedBlock().getBlock());
-            removeCollectedItemCount(stack);
-        }
+        if (!event.isCanceled() && event.getPlacedBlock() != null && event.getPlayer() instanceof EntityPlayerMP)
+            removeCollectedItemCount(new ItemStack(event.getPlacedBlock().getBlock()));
     }
 
     /**
@@ -139,34 +153,34 @@ public class AgentQuitFromPossessingItemImplementation extends HandlerBase imple
     private void addCollectedItemCount(ItemStack is) {
         boolean variant = getVariant(is);
 
-        int prev = (collectedItems.get(is.getUnlocalizedName()) == null ? 0
-                : collectedItems.get(is.getUnlocalizedName()));
+        int prev = (possessedItems.get(is.getUnlocalizedName()) == null ? 0
+                : possessedItems.get(is.getUnlocalizedName()));
         if (variant)
-            collectedItems.put(is.getUnlocalizedName(), prev + is.getCount());
+            possessedItems.put(is.getUnlocalizedName(), prev + is.getCount());
         else
-            collectedItems.put(is.getItem().getUnlocalizedName(), prev + is.getCount());
+            possessedItems.put(is.getItem().getUnlocalizedName(), prev + is.getCount());
 
     }
 
     private void removeCollectedItemCount(ItemStack is) {
         boolean variant = getVariant(is);
 
-        int prev = (collectedItems.get(is.getUnlocalizedName()) == null ? 0
-                : collectedItems.get(is.getUnlocalizedName()));
+        int prev = (possessedItems.get(is.getUnlocalizedName()) == null ? 0
+                : possessedItems.get(is.getUnlocalizedName()));
         if (variant)
-            collectedItems.put(is.getUnlocalizedName(), prev - is.getCount());
+            possessedItems.put(is.getUnlocalizedName(), prev - is.getCount());
         else
-            collectedItems.put(is.getItem().getUnlocalizedName(), prev - is.getCount());
+            possessedItems.put(is.getItem().getUnlocalizedName(), prev - is.getCount());
     }
 
     private int getCollectedItemCount(ItemStack is) {
         boolean variant = getVariant(is);
 
         if (variant)
-            return (collectedItems.get(is.getUnlocalizedName()) == null) ? 0 : collectedItems.get(is.getUnlocalizedName());
+            return (possessedItems.get(is.getUnlocalizedName()) == null) ? 0 : possessedItems.get(is.getUnlocalizedName());
         else
-            return (collectedItems.get(is.getItem().getUnlocalizedName()) == null) ? 0
-                    : collectedItems.get(is.getItem().getUnlocalizedName());
+            return (possessedItems.get(is.getItem().getUnlocalizedName()) == null) ? 0
+                    : possessedItems.get(is.getItem().getUnlocalizedName());
     }
 
     private void checkForMatch(ItemStack is) {
