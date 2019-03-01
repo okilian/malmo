@@ -31,7 +31,6 @@ import java.util.Map;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.microsoft.Malmo.MissionHandlers.RewardForCollectingItemImplementation;
 import com.microsoft.Malmo.MissionHandlers.RewardForDiscardingItemImplementation;
 
 import net.minecraft.block.Block;
@@ -43,9 +42,11 @@ import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -58,7 +59,10 @@ import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.ItemSmeltedEvent;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
@@ -343,9 +347,6 @@ public class CraftingHelper
                     }
                 }
             }
-            ItemStack resultForReward = isIngredient.copy();
-            RewardForDiscardingItemImplementation.LoseItemEvent event = new RewardForDiscardingItemImplementation.LoseItemEvent(resultForReward);
-            MinecraftForge.EVENT_BUS.post(event);
         }
     }
 
@@ -421,7 +422,9 @@ public class CraftingHelper
             ItemStack resultForInventory = is.copy();
             ItemStack resultForReward = is.copy();
             player.inventory.addItemStackToInventory(resultForInventory);
-            RewardForCollectingItemImplementation.GainItemEvent event = new RewardForCollectingItemImplementation.GainItemEvent(resultForReward);
+            // TODO
+            player.inventoryContainer.cra
+            ItemCraftedEvent event = new ItemCraftedEvent(player, resultForReward, null);
             MinecraftForge.EVENT_BUS.post(event);
 
             return true;
@@ -454,7 +457,7 @@ public class CraftingHelper
             ItemStack resultForInventory = isOutput.copy();
             ItemStack resultForReward = isOutput.copy();
             player.inventory.addItemStackToInventory(resultForInventory);
-            RewardForCollectingItemImplementation.GainItemEvent event = new RewardForCollectingItemImplementation.GainItemEvent(resultForReward);
+            ItemSmeltedEvent event = new ItemSmeltedEvent(player, resultForReward);
             MinecraftForge.EVENT_BUS.post(event);
 
             return true;

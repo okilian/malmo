@@ -10,7 +10,6 @@ import com.microsoft.Malmo.MalmoMod.MalmoMessageType;
 import com.microsoft.Malmo.MissionHandlerInterfaces.IRewardProducer;
 import com.microsoft.Malmo.Schemas.BlockOrItemSpecWithReward;
 import com.microsoft.Malmo.Schemas.MissionInit;
-import com.microsoft.Malmo.MissionHandlers.RewardForDiscardingItemImplementation.LoseItemEvent;
 import com.microsoft.Malmo.Schemas.RewardForPossessingItem;
 
 import io.netty.buffer.ByteBuf;
@@ -23,7 +22,6 @@ import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
 import net.minecraftforge.event.world.BlockEvent.PlaceEvent;
-import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
@@ -52,19 +50,6 @@ public class RewardForPossessingItemImplementation extends RewardForItemBase
     }
 
     @SubscribeEvent
-    public void onGainItem(GainItemEvent event) {
-        if (event.stack != null) {
-            accumulateReward(this.params.getDimension(), event.stack);
-        }
-    }
-
-    @SubscribeEvent
-    public void onLoseItem(LoseItemEvent event) {
-        if (event.stack != null)
-            removeCollectedItemCount(event.stack);
-    }
-
-    @SubscribeEvent
     public void onDropItem(ItemTossEvent event) {
         removeCollectedItemCount(event.getEntityItem().getEntityItem());
     }
@@ -76,10 +61,8 @@ public class RewardForPossessingItemImplementation extends RewardForItemBase
 
     @SubscribeEvent
     public void onBlockPlace(PlaceEvent event) {
-        if (!event.isCanceled() && event.getPlacedBlock() != null) {
-            ItemStack stack = new ItemStack(event.getPlacedBlock().getBlock());
-            removeCollectedItemCount(stack);
-        }
+        if (!event.isCanceled() && event.getPlacedBlock() != null)
+            removeCollectedItemCount(new ItemStack(event.getPlacedBlock().getBlock()));
     }
 
     /**
@@ -149,10 +132,7 @@ public class RewardForPossessingItemImplementation extends RewardForItemBase
                                         params.getDimension(),
                                         ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
                             }
-
-                        } else if (savedCollected != 0 && savedCollected >= matcher.matchSpec.getAmount()) {
-                            // Do nothing
-                        } else {
+                        } else if (savedCollected == 0) {
                             for (int i = 0; i < is.getCount() && i < matcher.matchSpec.getAmount(); i++) {
                                 this.adjustAndDistributeReward(
                                         ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
@@ -215,18 +195,9 @@ public class RewardForPossessingItemImplementation extends RewardForItemBase
         String buffString = data.get("message");
         ByteBuf buf = Unpooled.copiedBuffer(DatatypeConverter.parseBase64Binary(buffString));
         ItemStack itemStack = ByteBufUtils.readItemStack(buf);
-        if (itemStack != null) {
+        if (itemStack != null)
             accumulateReward(this.params.getDimension(), itemStack);
-        } else {
-            System.out.println("Error - couldn't understand the itemstack we received.");
-        }
-    }
-
-    public static class GainItemEvent extends Event {
-        public final ItemStack stack;
-
-        public GainItemEvent(ItemStack stack) {
-            this.stack = stack;
-        }
+        else
+            System.out.println("Error - couldn't understand the item stack we received.");
     }
 }

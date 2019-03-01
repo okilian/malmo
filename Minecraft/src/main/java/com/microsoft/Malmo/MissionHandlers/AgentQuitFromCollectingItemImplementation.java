@@ -6,14 +6,15 @@ import java.util.List;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import com.microsoft.Malmo.MissionHandlerInterfaces.IWantToQuit;
-import com.microsoft.Malmo.MissionHandlers.RewardForCollectingItemImplementation.GainItemEvent;
 import com.microsoft.Malmo.Schemas.AgentQuitFromCollectingItem;
 import com.microsoft.Malmo.Schemas.BlockOrItemSpecWithDescription;
 import com.microsoft.Malmo.Schemas.MissionInit;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.ItemPickupEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.ItemSmeltedEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
 
 /**
  * Quits the mission when the agent has collected the right amount of items. The count on the item collection is absolute.
@@ -73,16 +74,18 @@ public class AgentQuitFromCollectingItemImplementation extends HandlerBase imple
     }
 
     @SubscribeEvent
-    public void onGainItem(GainItemEvent event) {
-        checkForMatch(event.stack);
+    public void onPickupItem(ItemPickupEvent event) {
+        checkForMatch(event.pickedUp.getEntityItem());
     }
 
     @SubscribeEvent
-    public void onPickupItem(EntityItemPickupEvent event) {
-        if (event.getItem() != null) {
-            ItemStack stack = event.getItem().getEntityItem();
-            checkForMatch(stack);
-        }
+    public void onCraftItem(ItemCraftedEvent event) {
+        checkForMatch(event.crafting);
+    }
+
+    @SubscribeEvent
+    public void onSmeltItem(ItemSmeltedEvent event) {
+        checkForMatch(event.smelting);
     }
 
     /**

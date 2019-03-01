@@ -36,6 +36,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.item.ItemEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -175,6 +177,7 @@ public class InventoryCommandsImplementation extends CommandGroup
         @Override
         public IMessage onMessage(InventoryChangeMessage message, MessageContext ctx)
         {
+            /*
             if (message.itemsGained != null)
             {
                 RewardForCollectingItemImplementation.GainItemEvent event = new RewardForCollectingItemImplementation.GainItemEvent(message.itemsGained);
@@ -185,6 +188,7 @@ public class InventoryCommandsImplementation extends CommandGroup
                 RewardForDiscardingItemImplementation.LoseItemEvent event = new RewardForDiscardingItemImplementation.LoseItemEvent(message.itemsLost);
                 MinecraftForge.EVENT_BUS.post(event);
             }
+            */
             return null;
         }
     }

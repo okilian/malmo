@@ -5,19 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.microsoft.Malmo.Schemas.AgentQuitFromPossessingItem;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
-import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
-import net.minecraftforge.event.world.BlockEvent.PlaceEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import com.microsoft.Malmo.MissionHandlerInterfaces.IWantToQuit;
-import com.microsoft.Malmo.MissionHandlers.RewardForCollectingItemImplementation.GainItemEvent;
-import com.microsoft.Malmo.MissionHandlers.RewardForDiscardingItemImplementation.LoseItemEvent;
 import com.microsoft.Malmo.Schemas.BlockOrItemSpecWithDescription;
 import com.microsoft.Malmo.Schemas.MissionInit;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
  * @author Cayden Codel, Carnegie Mellon University
@@ -30,6 +27,7 @@ public class AgentQuitFromPossessingItemImplementation extends HandlerBase imple
 
     private AgentQuitFromPossessingItem params;
     private HashMap<String, Integer> collectedItems;
+    private boolean readyToGo = false;
     private List<ItemQuitMatcher> matchers;
     private String quitCode = "";
     private boolean wantToQuit = false;
@@ -72,7 +70,7 @@ public class AgentQuitFromPossessingItemImplementation extends HandlerBase imple
     @Override
     public void prepare(MissionInit missionInit) {
         MinecraftForge.EVENT_BUS.register(this);
-        collectedItems = new HashMap<String, Integer>();
+        readyToGo = true;
     }
 
     @Override
@@ -81,37 +79,12 @@ public class AgentQuitFromPossessingItemImplementation extends HandlerBase imple
     }
 
     @SubscribeEvent
-    public void onGainItem(GainItemEvent event) {
-        checkForMatch(event.stack);
-    }
-
-    @SubscribeEvent
-    public void onPickupItem(EntityItemPickupEvent event) {
-        if (event.getItem() != null)
-            checkForMatch(event.getItem().getEntityItem());
-    }
-
-    @SubscribeEvent
-    public void onLoseItem(LoseItemEvent event) {
-        if (event.stack != null)
-            removeCollectedItemCount(event.stack);
-    }
-
-    @SubscribeEvent
-    public void onDropItem(ItemTossEvent event) {
-        removeCollectedItemCount(event.getEntityItem().getEntityItem());
-    }
-
-    @SubscribeEvent
-    public void onDestroyItem(PlayerDestroyItemEvent event) {
-        removeCollectedItemCount(event.getOriginal());
-    }
-
-    @SubscribeEvent
-    public void onBlockPlace(PlaceEvent event) {
-        if (!event.isCanceled() && event.getPlacedBlock() != null) {
-            ItemStack stack = new ItemStack(event.getPlacedBlock().getBlock());
-            removeCollectedItemCount(stack);
+    public void onTick(TickEvent event) {
+        if (event.side.isServer() && readyToGo) {
+            collectedItems = new HashMap<String, Integer>();
+            InventoryPlayer inv = Minecraft.getMinecraft().player.inventory;
+            for (int i = 0; i < inv.getSizeInventory(); i++)
+                checkForMatch(inv.getStackInSlot(i));
         }
     }
 
@@ -145,18 +118,6 @@ public class AgentQuitFromPossessingItemImplementation extends HandlerBase imple
             collectedItems.put(is.getUnlocalizedName(), prev + is.getCount());
         else
             collectedItems.put(is.getItem().getUnlocalizedName(), prev + is.getCount());
-
-    }
-
-    private void removeCollectedItemCount(ItemStack is) {
-        boolean variant = getVariant(is);
-
-        int prev = (collectedItems.get(is.getUnlocalizedName()) == null ? 0
-                : collectedItems.get(is.getUnlocalizedName()));
-        if (variant)
-            collectedItems.put(is.getUnlocalizedName(), prev - is.getCount());
-        else
-            collectedItems.put(is.getItem().getUnlocalizedName(), prev - is.getCount());
     }
 
     private int getCollectedItemCount(ItemStack is) {

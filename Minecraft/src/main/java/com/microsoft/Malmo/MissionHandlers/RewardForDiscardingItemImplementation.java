@@ -31,7 +31,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
@@ -43,96 +42,72 @@ import com.microsoft.Malmo.Schemas.BlockOrItemSpecWithReward;
 import com.microsoft.Malmo.Schemas.MissionInit;
 import com.microsoft.Malmo.Schemas.RewardForDiscardingItem;
 
-public class RewardForDiscardingItemImplementation extends RewardForItemBase implements IRewardProducer, IMalmoMessageListener
-{
+public class RewardForDiscardingItemImplementation extends RewardForItemBase implements IRewardProducer, IMalmoMessageListener {
     private RewardForDiscardingItem params;
 
     @Override
-    public void onMessage(MalmoMessageType messageType, Map<String, String> data) 
-    {
+    public void onMessage(MalmoMessageType messageType, Map<String, String> data) {
         String bufstring = data.get("message");
         ByteBuf buf = Unpooled.copiedBuffer(DatatypeConverter.parseBase64Binary(bufstring));
         ItemStack itemStack = ByteBufUtils.readItemStack(buf);
-        if (itemStack != null && itemStack.getItem() != null)
-        {
+        if (itemStack != null)
             accumulateReward(this.params.getDimension(), itemStack);
-        }
         else
-        {
             System.out.println("Error - couldn't understand the itemstack we received.");
-        }
-    }
-    
-    public static class LoseItemEvent extends Event
-    {
-        public final ItemStack stack;
-
-        public LoseItemEvent(ItemStack stack)
-        {
-            this.stack = stack;
-        }
     }
 
     @Override
-    public boolean parseParameters(Object params)
-    {
-        if (params == null || !(params instanceof RewardForDiscardingItem))
+    public boolean parseParameters(Object params) {
+        if (!(params instanceof RewardForDiscardingItem))
             return false;
 
         // Build up a map of rewards per item:
-        this.params = (RewardForDiscardingItem)params;
+        this.params = (RewardForDiscardingItem) params;
         for (BlockOrItemSpecWithReward is : this.params.getItem())
             addItemSpecToRewardStructure(is);
 
         return true;
     }
 
+    /*
     @SubscribeEvent
-    public void onLoseItem(LoseItemEvent event)
-    {
-        if (event.stack != null)
-        {
+    public void onLoseItem(LoseItemEvent event) {
+        if (event.stack != null) {
             accumulateReward(this.params.getDimension(), event.stack);
         }
     }
+    */
 
     @SubscribeEvent
-    public void onTossItem(ItemTossEvent event)
-    {
-        if (event.getEntityItem() != null && event.getPlayer() instanceof EntityPlayerMP)
-        {
+    public void onTossItem(ItemTossEvent event) {
+        if (event.getEntityItem() != null && event.getPlayer() instanceof EntityPlayerMP) {
             ItemStack stack = event.getEntityItem().getEntityItem();
-            sendItemStackToClient((EntityPlayerMP)event.getPlayer(), MalmoMessageType.SERVER_DISCARDITEM, stack);
+            sendItemStackToClient((EntityPlayerMP) event.getPlayer(), MalmoMessageType.SERVER_DISCARDITEM, stack);
         }
     }
 
     @SubscribeEvent
-    public void onPlaceBlock(BlockEvent.PlaceEvent event)
-    {
-        if (event.getPlayer().getHeldItem(event.getHand()) != null && event.getPlayer() instanceof EntityPlayerMP )
-        {
+    public void onPlaceBlock(BlockEvent.PlaceEvent event) {
+        if (event.getPlayer() instanceof EntityPlayerMP) {
             // This event is received on the server side, so we need to pass it to the client.
-            sendItemStackToClient((EntityPlayerMP)event.getPlayer(), MalmoMessageType.SERVER_DISCARDITEM, event.getPlayer().getHeldItem(event.getHand()));
+            sendItemStackToClient((EntityPlayerMP) event.getPlayer(), MalmoMessageType.SERVER_DISCARDITEM, event.getPlayer().getHeldItem(event.getHand()));
         }
     }
 
     @Override
-    public void getReward(MissionInit missionInit,MultidimensionalReward reward)
-    {
+    public void getReward(MissionInit missionInit, MultidimensionalReward reward) {
         super.getReward(missionInit, reward);
     }
 
     @Override
-    public void prepare(MissionInit missionInit)
-    {
+    public void prepare(MissionInit missionInit) {
         super.prepare(missionInit);
         MinecraftForge.EVENT_BUS.register(this);
         MalmoMod.MalmoMessageHandler.registerForMessage(this, MalmoMessageType.SERVER_DISCARDITEM);
     }
 
     @Override
-    public void cleanup()
-    {
+    public void cleanup() {
         super.cleanup();
         MinecraftForge.EVENT_BUS.unregister(this);
         MalmoMod.MalmoMessageHandler.deregisterForMessage(this, MalmoMessageType.SERVER_DISCARDITEM);

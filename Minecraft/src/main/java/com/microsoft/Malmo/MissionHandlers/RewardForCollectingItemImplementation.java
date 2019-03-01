@@ -14,12 +14,12 @@ import com.microsoft.Malmo.Schemas.RewardForCollectingItem;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
-import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.ItemPickupEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.ItemSmeltedEvent;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import javax.xml.bind.DatatypeConverter;
@@ -30,27 +30,25 @@ import javax.xml.bind.DatatypeConverter;
  * Sends a reward when the agent collected the specified item with
  * specified amounts. Counter is absolute.
  */
-public class RewardForCollectingItemImplementation extends RewardForItemBase
-        implements IRewardProducer, IMalmoMessageListener {
+public class RewardForCollectingItemImplementation extends RewardForItemBase implements IRewardProducer, IMalmoMessageListener {
 
     private RewardForCollectingItem params;
     private ArrayList<ItemMatcher> matchers;
     private HashMap<String, Integer> craftedItems;
 
     @SubscribeEvent
-    public void onPickupItem(EntityItemPickupEvent event) {
-        if (event.getItem() != null) {
-            checkForMatch(event.getItem().getEntityItem());
-            if (event.getEntityPlayer() instanceof EntityPlayerMP)
-                sendItemStackToClient((EntityPlayerMP) event.getEntityPlayer(), MalmoMessageType.SERVER_COLLECTITEM, event.getItem().getEntityItem());
-        }
+    public void onPickupItem(ItemPickupEvent event) {
+        checkForMatch(event.pickedUp.getEntityItem());
     }
 
     @SubscribeEvent
-    public void onGainItem(GainItemEvent event) {
-        if (event.stack != null) {
-            accumulateReward(this.params.getDimension(), event.stack);
-        }
+    public void onItemCraft(ItemCraftedEvent event) {
+        checkForMatch(event.crafting);
+    }
+
+    @SubscribeEvent
+    public void onItemSmelt(ItemSmeltedEvent event) {
+        checkForMatch(event.smelting);
     }
 
     /**
@@ -110,9 +108,7 @@ public class RewardForCollectingItemImplementation extends RewardForItemBase
                                         ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
                             }
 
-                        } else if (savedCollected != 0 && savedCollected >= matcher.matchSpec.getAmount()) {
-                            // Do nothing
-                        } else {
+                        } else if (savedCollected == 0) {
                             for (int i = 0; i < is.getCount() && i < matcher.matchSpec.getAmount(); i++) {
                                 this.adjustAndDistributeReward(
                                         ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
@@ -175,18 +171,10 @@ public class RewardForCollectingItemImplementation extends RewardForItemBase
         String buffString = data.get("message");
         ByteBuf buf = Unpooled.copiedBuffer(DatatypeConverter.parseBase64Binary(buffString));
         ItemStack itemStack = ByteBufUtils.readItemStack(buf);
-        if (itemStack != null) {
+        if (itemStack != null)
             accumulateReward(this.params.getDimension(), itemStack);
-        } else {
-            System.out.println("Error - couldn't understand the itemstack we received.");
-        }
-    }
+        else
+            System.out.println("Error - couldn't understand the item stack we received.");
 
-    public static class GainItemEvent extends Event {
-        public final ItemStack stack;
-
-        public GainItemEvent(ItemStack stack) {
-            this.stack = stack;
-        }
     }
 }
