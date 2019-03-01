@@ -19,6 +19,7 @@
 
 package com.microsoft.Malmo.Utils;
 
+import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -46,7 +47,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -63,6 +66,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.ItemSmeltedEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
@@ -366,7 +370,28 @@ public class CraftingHelper
             if (obj instanceof IRecipe)
             {
                 ItemStack is = ((IRecipe)obj).getRecipeOutput();
-                if (is == null || target == null)
+                if (target == null)
+                    continue;
+                if (ItemStack.areItemsEqual(is, target))
+                {
+                    matchingRecipes.add((IRecipe)obj);
+                }
+            }
+        }
+        return matchingRecipes;
+    }
+
+    public static List<IRecipe> getRecipesForRequestedOutput(ItemStack target) {
+        List<IRecipe> matchingRecipes = new ArrayList<IRecipe>();
+        List<?> recipes = CraftingManager.getInstance().getRecipeList();
+        for (Object obj : recipes)
+        {
+            if (obj == null)
+                continue;
+            if (obj instanceof IRecipe)
+            {
+                ItemStack is = ((IRecipe)obj).getRecipeOutput();
+                if (target == null)
                     continue;
                 if (ItemStack.areItemsEqual(is, target))
                 {
@@ -408,8 +433,6 @@ public class CraftingHelper
             return false;
 
         ItemStack is = recipe.getRecipeOutput();
-        if (is == null)
-            return false;
 
         List<ItemStack> ingredients = getIngredients(recipe);
         if (playerHasIngredients(player, ingredients))
@@ -422,12 +445,24 @@ public class CraftingHelper
             ItemStack resultForInventory = is.copy();
             ItemStack resultForReward = is.copy();
             player.inventory.addItemStackToInventory(resultForInventory);
-            // TODO
-            player.inventoryContainer.cra
-            ItemCraftedEvent event = new ItemCraftedEvent(player, resultForReward, null);
-            MinecraftForge.EVENT_BUS.post(event);
+            List<IRecipe> recipes = getRecipesForRequestedOutput(resultForReward);
+            boolean foundShaped = false;
+            for (int i = 0; i < recipes.size(); i++) {
+                if (recipes.get(i) instanceof ShapedRecipes) {
+                    ShapedRecipes shaped = (ShapedRecipes) recipes.get(i);
+                    InventoryCrafting craftMatrix = new InventoryCrafting(player.inventoryContainer, 3, 3);
+                    for (int j = 0; j < 9; j++)
+                        if (j < shaped.recipeItems.length)
+                            craftMatrix.setInventorySlotContents(j, shaped.recipeItems[j]);
 
-            return true;
+                    ItemCraftedEvent event = new ItemCraftedEvent(player, resultForReward, craftMatrix);
+                    MinecraftForge.EVENT_BUS.post(event);
+                    foundShaped = true;
+                    break;
+                }
+            }
+
+            return foundShaped;
         }
         return false;
     }
