@@ -416,11 +416,11 @@ public class CraftingHelper {
                 if (iRecipe instanceof ShapedRecipes) {
                     ShapedRecipes shapedRecipe = (ShapedRecipes) iRecipe;
                     InventoryCrafting craftMatrix;
-                    if (shapedRecipe.recipeItems.length <= 4) 
+                    if (shapedRecipe.recipeItems.length <= 4)
                         craftMatrix = new InventoryCrafting(player.inventoryContainer, 2, 2);
                     else
                         craftMatrix = new InventoryCrafting(player.inventoryContainer, 3, 3);
-                    for (int i = 0; i < shapedRecipe.recipeItems.length(); i++)
+                    for (int i = 0; i < shapedRecipe.recipeItems.length; i++)
                         craftMatrix.setInventorySlotContents(i, shapedRecipe.recipeItems[i]);
 
 
