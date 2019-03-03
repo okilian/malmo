@@ -28,7 +28,15 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 public class RewardForPossessingItemImplementation extends RewardForItemBase implements IRewardProducer {
     private RewardForPossessingItem params;
     private ArrayList<ItemMatcher> matchers;
-    private HashMap<String, Integer> collectedItems;
+    /**
+     * A current mapping of strings to the amount of item we have
+     */
+    private HashMap<String, Integer> possessedItems;
+
+    /**
+     * A mapping of strings to the highest amount of an item we had at any single time
+     */
+    private HashMap<String, Integer> maxPossessedItems;
 
     @SubscribeEvent
     public void onGainItem(RewardForCollectingItemImplementation.GainItemEvent event) {
@@ -56,7 +64,7 @@ public class RewardForPossessingItemImplementation extends RewardForItemBase imp
 
     @SubscribeEvent
     public void onLoseItem(LoseItemEvent event) {
-        if (event.stack != null)
+        if (event.stack != null && event.cause == 0)
             removeCollectedItemCount(event.stack);
     }
 
@@ -99,70 +107,106 @@ public class RewardForPossessingItemImplementation extends RewardForItemBase imp
         return false;
     }
 
+    /**
+     * Since there are two counters, returns the current value of the items we have collected.
+     * Logic regarding the difference between active and max counter of items done below.
+     *
+     * @param is The item stack to get the count from
+     * @return The count, 0 if not encountered/collected before
+     */
     private int getCollectedItemCount(ItemStack is) {
         boolean variant = getVariant(is);
 
         if (variant)
-            return (collectedItems.get(is.getUnlocalizedName()) == null) ? 0 : collectedItems.get(is.getUnlocalizedName());
+            return (possessedItems.get(is.getUnlocalizedName()) == null) ? 0 : possessedItems.get(is.getUnlocalizedName());
         else
-            return (collectedItems.get(is.getItem().getUnlocalizedName()) == null) ? 0
-                    : collectedItems.get(is.getItem().getUnlocalizedName());
+            return (possessedItems.get(is.getItem().getUnlocalizedName()) == null) ? 0
+                    : possessedItems.get(is.getItem().getUnlocalizedName());
+    }
+
+    /**
+     * Since there are two counters, returns the max value of the items we have collected.
+     * Logic regarding the difference between active and max counter of items done below.
+     *
+     * @param is The item stack to get the count from
+     * @return The count, 0 if not encountered/collected before
+     */
+    private int getMaxCollectedItemCount(ItemStack is) {
+        boolean variant = getVariant(is);
+
+        if (variant)
+            return (maxPossessedItems.get(is.getUnlocalizedName()) == null) ? 0 : maxPossessedItems.get(is.getUnlocalizedName());
+        else
+            return (maxPossessedItems.get(is.getItem().getUnlocalizedName()) == null) ? 0
+                    : maxPossessedItems.get(is.getItem().getUnlocalizedName());
     }
 
     private void addCollectedItemCount(ItemStack is) {
         boolean variant = getVariant(is);
 
-        int prev = (collectedItems.get(is.getUnlocalizedName()) == null ? 0
-                : collectedItems.get(is.getUnlocalizedName()));
-        if (variant)
-            collectedItems.put(is.getUnlocalizedName(), prev + is.getCount());
-        else
-            collectedItems.put(is.getItem().getUnlocalizedName(), prev + is.getCount());
+        if (variant) {
+            int prev = (possessedItems.get(is.getUnlocalizedName()) == null ? 0
+                    : possessedItems.get(is.getUnlocalizedName()));
+            int maxPrev = (maxPossessedItems.get(is.getUnlocalizedName()) == null) ? 0
+                    : maxPossessedItems.get(is.getUnlocalizedName());
+            possessedItems.put(is.getUnlocalizedName(), prev + is.getCount());
+
+            if (prev + is.getCount() > maxPrev)
+                maxPossessedItems.put(is.getUnlocalizedName(), prev + is.getCount());
+        } else {
+            int prev = (possessedItems.get(is.getItem().getUnlocalizedName()) == null ? 0
+                    : possessedItems.get(is.getItem().getUnlocalizedName()));
+            int maxPrev = (maxPossessedItems.get(is.getItem().getUnlocalizedName()) == null) ? 0
+                    : maxPossessedItems.get(is.getItem().getUnlocalizedName());
+            possessedItems.put(is.getItem().getUnlocalizedName(), prev + is.getCount());
+
+            if (prev + is.getCount() > maxPrev)
+                maxPossessedItems.put(is.getItem().getUnlocalizedName(), prev + is.getCount());
+        }
     }
 
     private void removeCollectedItemCount(ItemStack is) {
         boolean variant = getVariant(is);
 
-        int prev = (collectedItems.get(is.getUnlocalizedName()) == null ? 0
-                : collectedItems.get(is.getUnlocalizedName()));
-        if (variant)
-            collectedItems.put(is.getUnlocalizedName(), prev - is.getCount());
-        else
-            collectedItems.put(is.getItem().getUnlocalizedName(), prev - is.getCount());
+        if (variant) {
+            int prev = (possessedItems.get(is.getUnlocalizedName()) == null ? 0
+                    : possessedItems.get(is.getUnlocalizedName()));
+            possessedItems.put(is.getUnlocalizedName(), prev - is.getCount());
+        } else {
+            int prev = (possessedItems.get(is.getItem().getUnlocalizedName()) == null ? 0
+                    : possessedItems.get(is.getItem().getUnlocalizedName()));
+            possessedItems.put(is.getItem().getUnlocalizedName(), prev - is.getCount());
+        }
     }
 
     private void checkForMatch(ItemStack is) {
         int savedCollected = getCollectedItemCount(is);
+        int maxCollected = getMaxCollectedItemCount(is);
         if (is != null) {
             for (ItemMatcher matcher : this.matchers) {
                 if (matcher.matches(is)) {
                     if (!params.isSparse()) {
                         if (savedCollected != 0 && savedCollected < matcher.matchSpec.getAmount()) {
                             for (int i = savedCollected; i < matcher.matchSpec.getAmount()
-                                    && i - savedCollected < is.getCount(); i++) {
-                                this.adjustAndDistributeReward(
-                                        ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
-                                        params.getDimension(),
-                                        ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
-                            }
-
-                        } else if (savedCollected == 0) {
-                            for (int i = 0; i < is.getCount() && i < matcher.matchSpec.getAmount(); i++) {
-                                this.adjustAndDistributeReward(
-                                        ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
-                                        params.getDimension(),
-                                        ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
-                            }
-                        }
-                    } else {
-                        if (savedCollected < matcher.matchSpec.getAmount()
-                                && savedCollected + is.getCount() >= matcher.matchSpec.getAmount()) {
-                            this.adjustAndDistributeReward(
-                                    ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
-                                    params.getDimension(),
-                                    ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
-                        }
-                    }
+                                    && i - savedCollected < is.getCount(); i++)
+                                if (i >= maxCollected)
+                                    this.adjustAndDistributeReward(
+                                            ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
+                                            params.getDimension(),
+                                            ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
+                        } else if (savedCollected == 0)
+                            for (int i = 0; i < is.getCount() && i < matcher.matchSpec.getAmount(); i++)
+                                if (i >= maxCollected)
+                                    this.adjustAndDistributeReward(
+                                            ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
+                                            params.getDimension(),
+                                            ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
+                    } else if (savedCollected < matcher.matchSpec.getAmount()
+                            && savedCollected + is.getCount() >= matcher.matchSpec.getAmount())
+                        this.adjustAndDistributeReward(
+                                ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
+                                params.getDimension(),
+                                ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
                 }
             }
 
@@ -188,7 +232,8 @@ public class RewardForPossessingItemImplementation extends RewardForItemBase imp
     public void prepare(MissionInit missionInit) {
         super.prepare(missionInit);
         MinecraftForge.EVENT_BUS.register(this);
-        collectedItems = new HashMap<String, Integer>();
+        possessedItems = new HashMap<String, Integer>();
+        maxPossessedItems = new HashMap<String, Integer>();
     }
 
     @Override

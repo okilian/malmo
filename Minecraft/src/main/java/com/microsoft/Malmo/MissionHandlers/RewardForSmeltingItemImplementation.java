@@ -8,6 +8,7 @@ import com.microsoft.Malmo.Schemas.BlockOrItemSpecWithReward;
 import com.microsoft.Malmo.Schemas.MissionInit;
 
 import com.microsoft.Malmo.Schemas.RewardForSmeltingItem;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -20,18 +21,14 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
  * specified amounts.
  */
 public class RewardForSmeltingItemImplementation extends RewardForItemBase implements IRewardProducer {
-
     private RewardForSmeltingItem params;
     private ArrayList<ItemMatcher> matchers;
-    private HashMap<String, Integer> craftedItems;
-    private int callSmelt = 0;
+    private HashMap<String, Integer> smeltedItems;
 
     @SubscribeEvent
     public void onItemSmelt(PlayerEvent.ItemSmeltedEvent event) {
-        if (callSmelt % 4 == 0)
+        if (event.player instanceof EntityPlayerMP && !event.smelting.isEmpty())
             checkForMatch(event.smelting);
-
-        callSmelt = (callSmelt + 1) % 4;
     }
 
     /**
@@ -59,21 +56,24 @@ public class RewardForSmeltingItemImplementation extends RewardForItemBase imple
         boolean variant = getVariant(is);
 
         if (variant)
-            return (craftedItems.get(is.getUnlocalizedName()) == null) ? 0 : craftedItems.get(is.getUnlocalizedName());
+            return (smeltedItems.get(is.getUnlocalizedName()) == null) ? 0 : smeltedItems.get(is.getUnlocalizedName());
         else
-            return (craftedItems.get(is.getItem().getUnlocalizedName()) == null) ? 0
-                    : craftedItems.get(is.getItem().getUnlocalizedName());
+            return (smeltedItems.get(is.getItem().getUnlocalizedName()) == null) ? 0
+                    : smeltedItems.get(is.getItem().getUnlocalizedName());
     }
 
     private void addSmeltedItemCount(ItemStack is) {
         boolean variant = getVariant(is);
 
-        int prev = (craftedItems.get(is.getUnlocalizedName()) == null ? 0
-                : craftedItems.get(is.getUnlocalizedName()));
-        if (variant)
-            craftedItems.put(is.getUnlocalizedName(), prev + is.getCount());
-        else
-            craftedItems.put(is.getItem().getUnlocalizedName(), prev + is.getCount());
+        if (variant) {
+            int prev = (smeltedItems.get(is.getUnlocalizedName()) == null ? 0
+                    : smeltedItems.get(is.getUnlocalizedName()));
+            smeltedItems.put(is.getUnlocalizedName(), prev + is.getCount());
+        } else {
+            int prev = (smeltedItems.get(is.getItem().getUnlocalizedName()) == null ? 0
+                    : smeltedItems.get(is.getItem().getUnlocalizedName()));
+            smeltedItems.put(is.getItem().getUnlocalizedName(), prev + is.getCount());
+        }
     }
 
     private void checkForMatch(ItemStack is) {
@@ -135,7 +135,7 @@ public class RewardForSmeltingItemImplementation extends RewardForItemBase imple
     public void prepare(MissionInit missionInit) {
         super.prepare(missionInit);
         MinecraftForge.EVENT_BUS.register(this);
-        craftedItems = new HashMap<String, Integer>();
+        smeltedItems = new HashMap<String, Integer>();
     }
 
     @Override

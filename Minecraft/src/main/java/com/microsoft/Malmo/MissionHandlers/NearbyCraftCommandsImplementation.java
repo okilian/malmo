@@ -27,13 +27,11 @@ import java.util.List;
 
 import net.minecraft.block.BlockWorkbench;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -54,14 +52,6 @@ import com.microsoft.Malmo.Utils.CraftingHelper;
 public class NearbyCraftCommandsImplementation extends CommandBase {
     private boolean isOverriding;
     private static ArrayList<BlockPos> craftingTables;
-
-    @SubscribeEvent
-    public void onJump(LivingEvent.LivingJumpEvent event) {
-        if (event.getEntity() instanceof EntityPlayerSP) {
-            System.out.println("Jump! Attempting to craft sticks.");
-            onExecute("craftNearby", "wooden_pickaxe", null);
-        }
-    }
 
     public static class CraftNearbyMessage implements IMessage {
         String parameters;
@@ -141,16 +131,19 @@ public class NearbyCraftCommandsImplementation extends CommandBase {
             }
 
             if (closeTable) {
-                System.out.println("We are close enough to the table");
                 // We are close enough, try crafting recipes
-                List<IRecipe> matching_recipes = CraftingHelper.getRecipesForRequestedOutput(message.parameters);
+                List<IRecipe> matching_recipes;
+                String[] split = message.parameters.split(" ");
+                if (split.length > 1)
+                    matching_recipes = CraftingHelper.getRecipesForRequestedOutput(message.parameters, true);
+                else
+                    matching_recipes = CraftingHelper.getRecipesForRequestedOutput(message.parameters, false);
+
                 for (IRecipe recipe : matching_recipes)
                     if (CraftingHelper.attemptCrafting(player, recipe))
                         return null;
-            } else
-                System.out.println("We are not close enough to a table");
+            }
 
-            System.out.println("Either didn't have the requisite materials or weren't close enough to a table");
             return null;
         }
     }

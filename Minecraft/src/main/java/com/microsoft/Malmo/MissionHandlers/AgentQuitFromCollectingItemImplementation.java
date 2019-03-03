@@ -75,7 +75,7 @@ public class AgentQuitFromCollectingItemImplementation extends HandlerBase imple
 
     @SubscribeEvent
     public void onGainItem(GainItemEvent event) {
-        if (event.stack != null)
+        if (event.stack != null && event.cause == 0)
             checkForMatch(event.stack);
     }
 
@@ -121,12 +121,15 @@ public class AgentQuitFromCollectingItemImplementation extends HandlerBase imple
     private void addCollectedItemCount(ItemStack is) {
         boolean variant = getVariant(is);
 
-        int prev = (collectedItems.get(is.getUnlocalizedName()) == null ? 0
-                : collectedItems.get(is.getUnlocalizedName()));
-        if (variant)
+        if (variant) {
+            int prev = (collectedItems.get(is.getUnlocalizedName()) == null ? 0
+                    : collectedItems.get(is.getUnlocalizedName()));
             collectedItems.put(is.getUnlocalizedName(), prev + is.getCount());
-        else
+        } else {
+            int prev = (collectedItems.get(is.getItem().getUnlocalizedName()) == null ? 0
+                    : collectedItems.get(is.getItem().getUnlocalizedName()));
             collectedItems.put(is.getItem().getUnlocalizedName(), prev + is.getCount());
+        }
     }
 
     private int getCollectedItemCount(ItemStack is) {

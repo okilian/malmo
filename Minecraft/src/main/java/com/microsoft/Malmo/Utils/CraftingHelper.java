@@ -56,7 +56,6 @@ import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.NoteBlockEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
@@ -233,7 +232,7 @@ public class CraftingHelper {
         int total = (fromCache != null) ? fromCache : 0;
         for (int i = 0; i < player.inventory.mainInventory.size(); i++) {
             ItemStack is = player.inventory.mainInventory.get(i);
-            total += TileEntityFurnace.getItemBurnTime(is);
+            total += is.getCount() * TileEntityFurnace.getItemBurnTime(is);
         }
         return total;
     }
@@ -294,7 +293,7 @@ public class CraftingHelper {
             int target = isIngredient.getCount();
             for (int i = 0; i < main.size() + arm.size() && target > 0; i++) {
                 ItemStack isPlayer = (i >= main.size()) ? arm.get(i - main.size()) : main.get(i);
-                if (isPlayer != null && isIngredient != null && itemStackIngredientsMatch(isPlayer, isIngredient)) {
+                if (itemStackIngredientsMatch(isPlayer, isIngredient)) {
                     if (target >= isPlayer.getCount()) {
                         // Consume this stack:
                         target -= isPlayer.getCount();
@@ -318,9 +317,10 @@ public class CraftingHelper {
      * Attempt to find all recipes that result in an item of the requested output.
      *
      * @param output the desired item, eg from Types.xsd - "diamond_pickaxe" etc - or as a Minecraft name - eg "tile.woolCarpet.blue"
+     * @param variant if variants should be obeyed in constructing the recipes, i.e. if false, variant blind
      * @return a list of IRecipe objects that result in this item.
      */
-    public static List<IRecipe> getRecipesForRequestedOutput(String output) {
+    public static List<IRecipe> getRecipesForRequestedOutput(String output, boolean variant) {
         List<IRecipe> matchingRecipes = new ArrayList<IRecipe>();
         ItemStack target = MinecraftTypeHelper.getItemStackFromParameterString(output);
         List<?> recipes = CraftingManager.getInstance().getRecipeList();
@@ -329,11 +329,12 @@ public class CraftingHelper {
                 continue;
             if (obj instanceof IRecipe) {
                 ItemStack is = ((IRecipe) obj).getRecipeOutput();
-                if (is == null || target == null)
+                if (target == null)
                     continue;
-                if (ItemStack.areItemsEqual(is, target)) {
+                if (variant && ItemStack.areItemsEqual(is, target))
                     matchingRecipes.add((IRecipe) obj);
-                }
+                else if (!variant && is.getItem() == target.getItem())
+                    matchingRecipes.add((IRecipe) obj);
             }
         }
         return matchingRecipes;
@@ -343,9 +344,10 @@ public class CraftingHelper {
      * Attempt to find all recipes that result in an item of the requested output.
      *
      * @param output the desired item, eg from Types.xsd - "diamond_pickaxe" etc - or as a Minecraft name - eg "tile.woolCarpet.blue"
+     * @param variant if variants should be obeyed in constructing the recipes, i.e. if false, variant blind
      * @return a list of IRecipe objects that result in this item.
      */
-    public static List<IRecipe> getRecipesForRequestedOutput(ItemStack output) {
+    public static List<IRecipe> getRecipesForRequestedOutput(ItemStack output, boolean variant) {
         List<IRecipe> matchingRecipes = new ArrayList<IRecipe>();
         List<?> recipes = CraftingManager.getInstance().getRecipeList();
         for (Object obj : recipes) {
@@ -355,9 +357,10 @@ public class CraftingHelper {
                 ItemStack is = ((IRecipe) obj).getRecipeOutput();
                 if (output == null)
                     continue;
-                if (ItemStack.areItemsEqual(is, output)) {
+                if (variant && ItemStack.areItemsEqual(is, output))
                     matchingRecipes.add((IRecipe) obj);
-                }
+                else if (!variant && is.getItem() == output.getItem())
+                    matchingRecipes.add((IRecipe) obj);
             }
         }
         return matchingRecipes;
@@ -366,7 +369,7 @@ public class CraftingHelper {
     /**
      * Attempt to find a smelting recipe that results in the requested output.
      *
-     * @param output
+     * @param output The output of the furnace burn
      * @return an ItemStack representing the required input.
      */
     public static ItemStack getSmeltingRecipeForRequestedOutput(String output) {
@@ -410,8 +413,7 @@ public class CraftingHelper {
             MinecraftForge.EVENT_BUS.post(event);
 
             // Now trigger a craft event
-            List<IRecipe> recipes = getRecipesForRequestedOutput(resultForReward);
-            System.out.println("Crafted an item, attempting to trigger an event, got a recipe list of size " + recipes.size() + " with the first recipe a " + recipes.get(0) + " and a " + recipes.get(0).getRecipeOutput().getUnlocalizedName());
+            List<IRecipe> recipes = getRecipesForRequestedOutput(resultForReward, true);
             for (IRecipe iRecipe : recipes) {
                 if (iRecipe instanceof ShapedRecipes) {
                     ShapedRecipes shapedRecipe = (ShapedRecipes) iRecipe;
@@ -423,24 +425,21 @@ public class CraftingHelper {
                     for (int i = 0; i < shapedRecipe.recipeItems.length; i++)
                         craftMatrix.setInventorySlotContents(i, shapedRecipe.recipeItems[i]);
 
-
-                    System.out.println("Triggered the event");
                     MinecraftForge.EVENT_BUS.post(new PlayerEvent.ItemCraftedEvent(player, resultForReward, craftMatrix));
                     break;
                 } else if (iRecipe instanceof ShapelessRecipes) {
                     ShapelessRecipes shapelessRecipe = (ShapelessRecipes) iRecipe;
                     InventoryCrafting craftMatrix;
-                    if (shapelessRecipe.recipeItems.size() == 4) {
+                    if (shapelessRecipe.recipeItems.size() <= 4) {
                         craftMatrix = new InventoryCrafting(player.inventoryContainer, 2, 2);
-                        for (int i = 0; i < 4; i++)
+                        for (int i = 0; i < shapelessRecipe.recipeItems.size(); i++)
                             craftMatrix.setInventorySlotContents(i, shapelessRecipe.recipeItems.get(i));
                     } else {
                         craftMatrix = new InventoryCrafting(player.inventoryContainer, 3, 3);
-                        for (int i = 0; i < 9; i++)
+                        for (int i = 0; i < shapelessRecipe.recipeItems.size(); i++)
                             craftMatrix.setInventorySlotContents(i, shapelessRecipe.recipeItems.get(i));
                     }
 
-                    System.out.println("Triggered the event");
                     MinecraftForge.EVENT_BUS.post(new PlayerEvent.ItemCraftedEvent(player, resultForReward, craftMatrix));
                     break;
                 } else if (iRecipe instanceof ShapedOreRecipe) {
@@ -453,16 +452,9 @@ public class CraftingHelper {
                         else if (input[i] instanceof NonNullList)
                             if (((NonNullList) input[i]).size() != 0)
                                 craftMatrix.setInventorySlotContents(i, (ItemStack) ((NonNullList) input[i]).get(0));
-
-                        if (input[i] != null)
-                            System.out.println(input[i].toString());
                     }
 
-
-                    System.out.println("Triggered event");
                     MinecraftForge.EVENT_BUS.post(new PlayerEvent.ItemCraftedEvent(player, resultForReward, craftMatrix));
-                } else {
-                    System.out.println(iRecipe.toString());
                 }
             }
 
@@ -485,7 +477,7 @@ public class CraftingHelper {
             return false;
         List<ItemStack> ingredients = new ArrayList<ItemStack>();
         ingredients.add(input);
-        ItemStack isOutput = (ItemStack) FurnaceRecipes.instance().getSmeltingList().get(input);
+        ItemStack isOutput = FurnaceRecipes.instance().getSmeltingList().get(input);
         if (isOutput == null)
             return false;
         int cookingTime = 200;  // Seems to be hard-coded in TileEntityFurnace.

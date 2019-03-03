@@ -65,12 +65,15 @@ public class RewardForCraftingItemImplementation extends RewardForItemBase imple
     private void addCraftedItemCount(ItemStack is) {
         boolean variant = getVariant(is);
 
-        int prev = (craftedItems.get(is.getUnlocalizedName()) == null ? 0
-                : craftedItems.get(is.getUnlocalizedName()));
-        if (variant)
+        if (variant) {
+            int prev = (craftedItems.get(is.getUnlocalizedName()) == null ? 0
+                    : craftedItems.get(is.getUnlocalizedName()));
             craftedItems.put(is.getUnlocalizedName(), prev + is.getCount());
-        else
+        } else {
+            int prev = (craftedItems.get(is.getItem().getUnlocalizedName()) == null ? 0
+                    : craftedItems.get(is.getItem().getUnlocalizedName()));
             craftedItems.put(is.getItem().getUnlocalizedName(), prev + is.getCount());
+        }
     }
 
     private void checkForMatch(ItemStack is) {

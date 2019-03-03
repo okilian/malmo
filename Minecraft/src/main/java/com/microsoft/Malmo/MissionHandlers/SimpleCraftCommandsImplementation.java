@@ -73,7 +73,13 @@ public class SimpleCraftCommandsImplementation extends CommandBase
         {
             EntityPlayerMP player = ctx.getServerHandler().playerEntity;
             // Try crafting recipes first:
-            List<IRecipe> matching_recipes = CraftingHelper.getRecipesForRequestedOutput(message.parameters);
+            List<IRecipe> matching_recipes;
+            String[] split = message.parameters.split(" ");
+            if (split.length > 1)
+                matching_recipes = CraftingHelper.getRecipesForRequestedOutput(message.parameters, true);
+            else
+                matching_recipes = CraftingHelper.getRecipesForRequestedOutput(message.parameters, false);
+
             for (IRecipe recipe : matching_recipes)
             {
                 if (CraftingHelper.attemptCrafting(player, recipe))

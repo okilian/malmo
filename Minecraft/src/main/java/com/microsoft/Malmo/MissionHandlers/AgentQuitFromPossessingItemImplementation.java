@@ -83,7 +83,7 @@ public class AgentQuitFromPossessingItemImplementation extends HandlerBase imple
 
     @SubscribeEvent
     public void onGainItem(GainItemEvent event) {
-        if (event.stack != null)
+        if (event.stack != null && event.cause == 0)
             checkForMatch(event.stack);
     }
 
@@ -107,7 +107,7 @@ public class AgentQuitFromPossessingItemImplementation extends HandlerBase imple
 
     @SubscribeEvent
     public void onLoseItem(LoseItemEvent event) {
-        if (event.stack != null)
+        if (event.stack != null && event.cause == 0)
             removeCollectedItemCount(event.stack);
     }
 
@@ -153,24 +153,29 @@ public class AgentQuitFromPossessingItemImplementation extends HandlerBase imple
     private void addCollectedItemCount(ItemStack is) {
         boolean variant = getVariant(is);
 
-        int prev = (possessedItems.get(is.getUnlocalizedName()) == null ? 0
-                : possessedItems.get(is.getUnlocalizedName()));
-        if (variant)
+        if (variant) {
+            int prev = (possessedItems.get(is.getUnlocalizedName()) == null ? 0
+                    : possessedItems.get(is.getUnlocalizedName()));
             possessedItems.put(is.getUnlocalizedName(), prev + is.getCount());
-        else
+        } else {
+            int prev = (possessedItems.get(is.getItem().getUnlocalizedName()) == null ? 0
+                    : possessedItems.get(is.getItem().getUnlocalizedName()));
             possessedItems.put(is.getItem().getUnlocalizedName(), prev + is.getCount());
-
+        }
     }
 
     private void removeCollectedItemCount(ItemStack is) {
         boolean variant = getVariant(is);
 
-        int prev = (possessedItems.get(is.getUnlocalizedName()) == null ? 0
-                : possessedItems.get(is.getUnlocalizedName()));
-        if (variant)
+        if (variant) {
+            int prev = (possessedItems.get(is.getUnlocalizedName()) == null ? 0
+                    : possessedItems.get(is.getUnlocalizedName()));
             possessedItems.put(is.getUnlocalizedName(), prev - is.getCount());
-        else
+        } else {
+            int prev = (possessedItems.get(is.getItem().getUnlocalizedName()) == null ? 0
+                    : possessedItems.get(is.getItem().getUnlocalizedName()));
             possessedItems.put(is.getItem().getUnlocalizedName(), prev - is.getCount());
+        }
     }
 
     private int getCollectedItemCount(ItemStack is) {
