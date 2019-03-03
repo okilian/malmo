@@ -77,40 +77,29 @@ public class RewardForSmeltingItemImplementation extends RewardForItemBase imple
     }
 
     private void checkForMatch(ItemStack is) {
-        System.out.println("[REWARD] Checking stack " + is.getUnlocalizedName() + " " + is.getCount());
         int savedSmelted = getSmeltedItemCount(is);
-        System.out.println("[REWARD] Previous saved amount is " + savedSmelted);
         for (ItemMatcher matcher : this.matchers) {
             if (matcher.matches(is)) {
                 if (!params.isSparse()) {
                     if (savedSmelted != 0 && savedSmelted < matcher.matchSpec.getAmount()) {
                         for (int i = savedSmelted; i < matcher.matchSpec.getAmount()
-                                && i - savedSmelted < is.getCount(); i++) {
-                            System.out.println("Giving reward");
+                                && i - savedSmelted < is.getCount(); i++)
                             this.adjustAndDistributeReward(
                                     ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
                                     params.getDimension(),
                                     ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
-                        }
-                    } else if (savedSmelted == 0) {
-                        for (int i = 0; i < is.getCount() && i < matcher.matchSpec.getAmount(); i++) {
-                            System.out.println("Giving reward");
+                    } else if (savedSmelted == 0)
+                        for (int i = 0; i < is.getCount() && i < matcher.matchSpec.getAmount(); i++)
                             this.adjustAndDistributeReward(
                                     ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
                                     params.getDimension(),
                                     ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
-                        }
-                    }
-                } else {
-                    if (savedSmelted < matcher.matchSpec.getAmount()
-                            && savedSmelted + is.getCount() >= matcher.matchSpec.getAmount()) {
-                        System.out.println("Giving reward");
-                        this.adjustAndDistributeReward(
-                                ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
-                                params.getDimension(),
-                                ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
-                    }
-                }
+                } else if (savedSmelted < matcher.matchSpec.getAmount()
+                        && savedSmelted + is.getCount() >= matcher.matchSpec.getAmount())
+                    this.adjustAndDistributeReward(
+                            ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
+                            params.getDimension(),
+                            ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
             }
         }
 
