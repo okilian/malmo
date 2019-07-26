@@ -91,7 +91,7 @@ public class TimeHelper
             // Build a locking system.
             if ( ! isTicking && synchronous) {
 
-                // TimeHelper.SyncManager.debugLog("============ SYNC TICK STARTED ===========");
+                TimeHelper.SyncManager.debugLog("============ SYNC TICK STARTED ===========");
                 shouldClientTick = true;
                 isTicking = true;
                 clientTickCompleted = false;
@@ -106,7 +106,7 @@ public class TimeHelper
 
         public static synchronized void setPistolFired(Boolean hasIt){
             if(hasIt && !serverPistolFired){
-                // TimeHelper.SyncManager.debugLog("Server pistol has started firing.");
+                TimeHelper.SyncManager.debugLog("Server pistol has started firing.");
             }
             serverPistolFired = hasIt;
         }   
