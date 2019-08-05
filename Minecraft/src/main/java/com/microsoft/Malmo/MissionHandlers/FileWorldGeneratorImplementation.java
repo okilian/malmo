@@ -21,6 +21,7 @@ package com.microsoft.Malmo.MissionHandlers;
 
 import java.io.File;
 import java.util.List;
+import java.math.random;
 
 import net.minecraft.client.AnvilConverterException;
 import net.minecraft.client.Minecraft;
@@ -113,6 +114,12 @@ public class FileWorldGeneratorImplementation extends HandlerBase implements IWo
         {
             this.errorDetails = "Minecraft could not load " + this.mapFilename + " - is it a valid saved world?";
             return false;
+        }
+
+        if (this.fwparams.getRandomizedSpawnRadius > 0)
+        {
+            location =
+            Minecraft.getMinecraft(). .getIntegratedServer().playerSpawn()
         }
         MapFileHelper.cleanupTemporaryWorlds(mapCopy.getName());    // Now we are safely running a new file, we can attempt to clean up old ones.
         return true;

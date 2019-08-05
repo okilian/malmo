@@ -178,6 +178,14 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
+            <xs:attribute name="randomizedSpawnRadius" use="optional" type="xs:int" default="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        Set this greater than 0 to randomize the starting location of agents uniformly within the
+                        specified radius
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 
