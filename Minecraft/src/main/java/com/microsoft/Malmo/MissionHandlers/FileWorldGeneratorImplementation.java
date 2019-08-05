@@ -21,11 +21,18 @@ package com.microsoft.Malmo.MissionHandlers;
 
 import java.io.File;
 import java.util.List;
-import java.math.random;
+import java.util.Random;
 
+
+import com.microsoft.Malmo.Utils.PositionHelper;
+import com.microsoft.Malmo.Utils.SeedHelper;
+import jdk.nashorn.internal.ir.Block;
 import net.minecraft.client.AnvilConverterException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.WorldSummary;
@@ -116,10 +123,19 @@ public class FileWorldGeneratorImplementation extends HandlerBase implements IWo
             return false;
         }
 
-        if (this.fwparams.getRandomizedSpawnRadius > 0)
+        if (this.fwparams.getRandomizedSpawnRadius() > 0)
         {
-            location =
-            Minecraft.getMinecraft(). .getIntegratedServer().playerSpawn()
+            int spawnRadius = this.fwparams.getRandomizedSpawnRadius();
+            Random rand = SeedHelper.getRandom();
+            World world = Minecraft.getMinecraft().getIntegratedServer().getEntityWorld();
+            BlockPos pos = world.getSpawnPoint();
+            pos.add( new Vec3i(
+                    rand.nextInt(2 * spawnRadius) - spawnRadius,
+                    0,
+                    rand.nextInt(2 * spawnRadius) - spawnRadius));
+            BlockPos spawn = PositionHelper.getTopSolidOrLiquidBlock(world, pos);
+
+            world.setSpawnPoint(spawn);
         }
         MapFileHelper.cleanupTemporaryWorlds(mapCopy.getName());    // Now we are safely running a new file, we can attempt to clean up old ones.
         return true;
