@@ -119,6 +119,14 @@
         </xs:annotation>
         <xs:complexType>
             <xs:all>
+                <xs:element name="Randomized" type="xs:boolean" minOccurs="0" maxOccurs="1" >
+                    <xs:annotation>
+                        <xs:documentation>
+                            If set to true, use the X and Z elements of placement to chose a random position on the top solid
+                            or liquid block with x,z position from [-X, X], [-Z, Z] inclusive.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
                 <xs:element name="Placement" type="PosAndDirection" minOccurs="0" maxOccurs="1">
                   <xs:annotation>
                     <xs:documentation>

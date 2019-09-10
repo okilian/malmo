@@ -20,22 +20,27 @@
 package com.microsoft.Malmo.Server;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.GameType;
@@ -75,6 +80,7 @@ import com.microsoft.Malmo.Utils.EnvironmentHelper;
 import com.microsoft.Malmo.Utils.MinecraftTypeHelper;
 import com.microsoft.Malmo.Utils.SchemaHelper;
 import com.microsoft.Malmo.Utils.ScreenHelper;
+import com.microsoft.Malmo.Utils.SeedHelper;
 import com.microsoft.Malmo.Utils.TimeHelper;
 
 /**
@@ -803,7 +809,7 @@ public class ServerStateMachine extends StateMachine
             AgentSection as = getAgentSectionFromAgentName(agentname);
             EntityPlayerMP player = getPlayerFromUsername(username);
 
-            if (player != null && as != null)
+            if (player != null && as != null) 
             {
                 if ((player.getHealth() <= 0 || player.isDead || !player.isEntityAlive()))
                 {
@@ -821,13 +827,30 @@ public class ServerStateMachine extends StateMachine
 
                 // Set their initial position and speed:
                 PosAndDirection pos = as.getAgentStart().getPlacement();
+
+                if (as.getAgentStart().isRandomized())
+                {
+                    Random rand = SeedHelper.getRandom("agentStart");
+                    int x_bound = (int) pos.getX().doubleValue();
+                    int z_bound = (int) pos.getZ().doubleValue();
+                    Vec3d pos_d = new Vec3d(
+                        rand.nextInt(x_bound * 2) - x_bound,
+                        0.0,
+                        rand.nextInt(z_bound * 2) - z_bound);
+                    BlockPos blockPos = new BlockPos(pos_d);
+                    BlockPos new_pos = Minecraft.getMinecraft().world.getTopSolidOrLiquidBlock(blockPos);
+                    pos.setX(new BigDecimal(new_pos.getX()));
+                    pos.setY(new BigDecimal(new_pos.getY()));
+                    pos.setZ(new BigDecimal(new_pos.getZ()));
+                }
                 if (pos != null) {
                     player.rotationYaw = pos.getYaw().floatValue();
                     player.rotationPitch = pos.getPitch().floatValue();
                     player.setPositionAndUpdate(pos.getX().doubleValue(),pos.getY().doubleValue(),pos.getZ().doubleValue());
                     player.onUpdate();	// Needed to force scene to redraw
                 }
-                player.setVelocity(0, 0, 0);	// Minimise chance of drift!
+                // player.setVelocity(0, 0, 0);	// Minimise chance of drift!
+                
 
                 // Set their inventory:
                 if (as.getAgentStart().getInventory() != null)
@@ -840,7 +863,7 @@ public class ServerStateMachine extends StateMachine
                 player.setGameType(GameType.SPECTATOR);
             }
         }
-
+        
         private boolean disablePlayerGracePeriod(EntityPlayerMP player)
         {
             // Are we in the dev environment or deployed?
