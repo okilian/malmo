@@ -842,6 +842,7 @@ public class ServerStateMachine extends StateMachine
                     pos.setX(new BigDecimal(new_pos.getX()));
                     pos.setY(new BigDecimal(new_pos.getY()));
                     pos.setZ(new BigDecimal(new_pos.getZ()));
+                    System.out.println("Set random start!");
                 }
                 if (pos != null) {
                     player.rotationYaw = pos.getYaw().floatValue();
