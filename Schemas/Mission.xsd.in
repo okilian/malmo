@@ -122,8 +122,7 @@
                 <xs:element name="Randomized" type="xs:boolean" minOccurs="0" maxOccurs="1" >
                     <xs:annotation>
                         <xs:documentation>
-                            If set to true, use the X and Z elements of placement to chose a random position on the top solid
-                            or liquid block with x,z position from [-X, X], [-Z, Z] inclusive.
+                            If set to true, use a random spawn location from 0 to Integer.max, chosing y to be the top liquid or solid block.
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>

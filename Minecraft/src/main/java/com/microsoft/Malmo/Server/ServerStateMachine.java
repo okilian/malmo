@@ -834,9 +834,9 @@ public class ServerStateMachine extends StateMachine
                     int x_bound = (int) pos.getX().doubleValue();
                     int z_bound = (int) pos.getZ().doubleValue();
                     Vec3d pos_d = new Vec3d(
-                        rand.nextInt(x_bound * 2) - x_bound,
+                        rand.nextInt(Integer.MAX_VALUE),
                         0.0,
-                        rand.nextInt(z_bound * 2) - z_bound);
+                        rand.nextInt(Integer.MAX_VALUE));
                     BlockPos blockPos = new BlockPos(pos_d);
                     BlockPos new_pos = Minecraft.getMinecraft().world.getTopSolidOrLiquidBlock(blockPos);
                     pos.setX(new BigDecimal(new_pos.getX()));
