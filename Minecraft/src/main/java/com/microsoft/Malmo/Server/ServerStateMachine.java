@@ -68,6 +68,7 @@ import com.microsoft.Malmo.MissionHandlers.MissionBehaviour;
 import com.microsoft.Malmo.Schemas.AgentSection;
 import com.microsoft.Malmo.Schemas.AgentStart.EnderBoxInventory;
 import com.microsoft.Malmo.Schemas.AgentStart.Inventory;
+import com.microsoft.Malmo.Schemas.AgentStart.*;
 import com.microsoft.Malmo.Schemas.DrawItem;
 import com.microsoft.Malmo.Schemas.EntityTypes;
 import com.microsoft.Malmo.Schemas.InventoryObjectType;
@@ -565,6 +566,8 @@ public class ServerStateMachine extends StateMachine
                     episodeHasCompleted(ServerState.ERROR);
                 }
             }
+
+
             if (builtOkay)
             {
                 // Now set up other attributes of the environment (eg weather)
@@ -828,29 +831,14 @@ public class ServerStateMachine extends StateMachine
                 // Set their initial position and speed:
                 PosAndDirection pos = as.getAgentStart().getPlacement();
 
-                if (as.getAgentStart().isRandomized())
-                {
-                    Random rand = SeedHelper.getRandom("agentStart");
-                    int x_bound = (int) pos.getX().doubleValue();
-                    int z_bound = (int) pos.getZ().doubleValue();
-                    Vec3d pos_d = new Vec3d(
-                        rand.nextInt(Integer.MAX_VALUE),
-                        0.0,
-                        rand.nextInt(Integer.MAX_VALUE));
-                    BlockPos blockPos = new BlockPos(pos_d);
-                    BlockPos new_pos = Minecraft.getMinecraft().world.getTopSolidOrLiquidBlock(blockPos);
-                    pos.setX(new BigDecimal(new_pos.getX()));
-                    pos.setY(new BigDecimal(new_pos.getY()));
-                    pos.setZ(new BigDecimal(new_pos.getZ()));
-                    System.out.println("Set random start!");
-                }
                 if (pos != null) {
                     player.rotationYaw = pos.getYaw().floatValue();
                     player.rotationPitch = pos.getPitch().floatValue();
                     player.setPositionAndUpdate(pos.getX().doubleValue(),pos.getY().doubleValue(),pos.getZ().doubleValue());
                     player.onUpdate();	// Needed to force scene to redraw
                 }
-                // player.setVelocity(0, 0, 0);	// Minimise chance of drift!
+                player.setVelocity(0, 0, 0);	// Minimise chance of drift!
+                as.getAgentStart().setPlacement(pos);
                 
 
                 // Set their inventory:

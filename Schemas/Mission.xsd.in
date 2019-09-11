@@ -119,7 +119,7 @@
         </xs:annotation>
         <xs:complexType>
             <xs:all>
-                <xs:element name="Randomized" type="xs:boolean" minOccurs="0" maxOccurs="1" >
+                <xs:element name="Randomized" type="xs:boolean" minOccurs="0" maxOccurs="1" default="false">
                     <xs:annotation>
                         <xs:documentation>
                             If set to true, use a random spawn location from 0 to Integer.max, chosing y to be the top liquid or solid block.
@@ -468,6 +468,7 @@
                     <xs:element ref="MovingTargetDecorator" />
                     <xs:element ref="BuildBattleDecorator" />
                     <xs:element ref="NavigationDecorator" />
+                    <xs:element ref="RandomizedStartDecorator" />
                 </xs:choice>
                 <xs:choice minOccurs="0" maxOccurs="unbounded">
                     <xs:annotation>
