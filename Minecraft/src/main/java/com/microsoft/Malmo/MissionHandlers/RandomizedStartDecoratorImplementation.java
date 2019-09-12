@@ -88,9 +88,9 @@ public class RandomizedStartDecoratorImplementation extends HandlerBase implemen
             BlockPos blockPos = new BlockPos(pos_d);
             BlockPos new_pos = PositionHelper.getTopSolidOrLiquidBlock(world, blockPos);
             System.out.println("Selected random start:" + new_pos.toString());
-            pos.setX(new BigDecimal(new_pos.getX()));
+            pos.setX(new BigDecimal(new_pos.getX() + 0.5));
             pos.setY(new BigDecimal(new_pos.getY()));
-            pos.setZ(new BigDecimal(new_pos.getZ()));
+            pos.setZ(new BigDecimal(new_pos.getZ() + 0.5));
             System.out.println("Set random start!");
                 
             this.startPosition = pos;
