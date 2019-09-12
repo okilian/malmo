@@ -81,9 +81,9 @@ public class RandomizedStartDecoratorImplementation extends HandlerBase implemen
         for (AgentSection as : missionInit.getMission().getAgentSection())
         {
             Vec3d pos_d = new Vec3d(
-            this.rand.nextInt(1600),
+            this.rand.nextInt(16000),
             0.0,
-            this.rand.nextInt(1600));
+            this.rand.nextInt(16000));
             BlockPos blockPos = new BlockPos(pos_d);
             BlockPos new_pos = world.getTopSolidOrLiquidBlock(blockPos);
             System.out.println("Selected random start:" + new_pos.toString());
