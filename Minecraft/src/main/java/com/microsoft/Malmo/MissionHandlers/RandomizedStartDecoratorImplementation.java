@@ -44,6 +44,7 @@ import com.microsoft.Malmo.Schemas.RandomizedStartDecorator;
 import com.microsoft.Malmo.Schemas.MissionInit;
 import com.microsoft.Malmo.Schemas.PosAndDirection;
 import com.microsoft.Malmo.Utils.MinecraftTypeHelper;
+import com.microsoft.Malmo.Utils.PositionHelper;
 import com.microsoft.Malmo.Utils.SeedHelper;
 
 public class RandomizedStartDecoratorImplementation extends HandlerBase implements IWorldDecorator
@@ -85,7 +86,7 @@ public class RandomizedStartDecoratorImplementation extends HandlerBase implemen
             0.0,
             this.rand.nextInt(16000));
             BlockPos blockPos = new BlockPos(pos_d);
-            BlockPos new_pos = world.getTopSolidOrLiquidBlock(blockPos);
+            BlockPos new_pos = PositionHelper.getTopSolidOrLiquidBlock(world, blockPos);
             System.out.println("Selected random start:" + new_pos.toString());
             pos.setX(new BigDecimal(new_pos.getX()));
             pos.setY(new BigDecimal(new_pos.getY()));
