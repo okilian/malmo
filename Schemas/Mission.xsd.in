@@ -119,13 +119,6 @@
         </xs:annotation>
         <xs:complexType>
             <xs:all>
-                <xs:element name="Randomized" type="xs:boolean" minOccurs="0" maxOccurs="1" default="false">
-                    <xs:annotation>
-                        <xs:documentation>
-                            If set to true, use a random spawn location from 0 to Integer.max, chosing y to be the top liquid or solid block.
-                        </xs:documentation>
-                    </xs:annotation>
-                </xs:element>
                 <xs:element name="Placement" type="PosAndDirection" minOccurs="0" maxOccurs="1">
                   <xs:annotation>
                     <xs:documentation>
