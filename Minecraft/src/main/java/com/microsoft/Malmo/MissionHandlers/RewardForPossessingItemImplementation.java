@@ -57,6 +57,7 @@ public class RewardForPossessingItemImplementation extends RewardForItemBase imp
      */
     private HashMap<String, Integer> maxPossessedItems;
 
+    // Note - subscribing toonItemCraft or onItemSmelt will cause those items to be dobule counted
     @SubscribeEvent
     public void onGainItem(RewardForCollectingItemImplementation.GainItemEvent event) {
         if (event.stack != null)
@@ -69,17 +70,6 @@ public class RewardForPossessingItemImplementation extends RewardForItemBase imp
             checkForMatch(event.getItem().getEntityItem());
     }
 
-    @SubscribeEvent
-    public void onItemCraft(PlayerEvent.ItemCraftedEvent event) {
-        if (event.player instanceof EntityPlayerMP && !event.crafting.isEmpty())
-            checkForMatch(event.crafting);
-    }
-
-    @SubscribeEvent
-    public void onItemSmelt(PlayerEvent.ItemSmeltedEvent event) {
-        if (event.player instanceof EntityPlayerMP && !event.smelting.isEmpty())
-            checkForMatch(event.smelting);
-    }
 
     @SubscribeEvent
     public void onLoseItem(LoseItemEvent event) {
@@ -198,49 +188,51 @@ public class RewardForPossessingItemImplementation extends RewardForItemBase imp
         }
     }
 
-    private void checkForMatch(ItemStack is) {
-        int savedCollected = getCollectedItemCount(is);
-        int maxCollected = getMaxCollectedItemCount(is);
-        if (is != null) {
+    private void checkForMatch(ItemStack item_stack) {
+        int savedCollected = getCollectedItemCount(item_stack);
+        int maxCollected = getMaxCollectedItemCount(item_stack);
+        int nowCollected = savedCollected + item_stack.getCount();
+        if (item_stack != null) {
             for (ItemMatcher matcher : this.matchers) {
-                if (matcher.matches(is)) {
-                    if (!params.isSparse()) {
-                        if (savedCollected != 0 && savedCollected < matcher.matchSpec.getAmount()) {
-                            for (int i = savedCollected; i < matcher.matchSpec.getAmount()
-                                    && i - savedCollected < is.getCount(); i++) {
-                                if (i >= maxCollected) {
-                                    int dimension = params.getDimension();
-                                    float adjusted_reward = this.adjustAndDistributeReward(
-                                            ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
-                                            params.getDimension(),
-                                            ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
-                                    addCachedReward(dimension, adjusted_reward);
-                                }
-                            }
-                        } else if (savedCollected == 0)
-                            for (int i = 0; i < is.getCount() && i < matcher.matchSpec.getAmount(); i++) {
-                                if (i >= maxCollected) {
-                                    int dimension = params.getDimension();
-                                    float adjusted_reward = this.adjustAndDistributeReward(
-                                            ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
-                                            params.getDimension(),
-                                            ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
-                                    addCachedReward(dimension, adjusted_reward);
-                                }
-                            }
-                    } else if (savedCollected < matcher.matchSpec.getAmount()
-                            && savedCollected + is.getCount() >= matcher.matchSpec.getAmount()) {
-                        int dimension = params.getDimension();
-                        float adjusted_reward = this.adjustAndDistributeReward(
-                                ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
-                                params.getDimension(),
-                                ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
-                        addCachedReward(dimension, adjusted_reward);
+                if (matcher.matches(item_stack)) {
+                    if (params.isSparse()){
+                        // If sparse rewards and amount collected has been reached we are done giving rewards for this handler
+                        if (maxCollected >= matcher.matchSpec.getAmount())
+                            break;
+                        // Otherwise if we currently reach the reward threshold send the reward
+                        else if (nowCollected >= matcher.matchSpec.getAmount()) {
+                            int dimension = params.getDimension();
+                            float adjusted_reward = this.adjustAndDistributeReward(
+                                    ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue(),
+                                    params.getDimension(),
+                                    ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
+                            addCachedReward(dimension, adjusted_reward);
+                        }
+                    } else {
+                        int number_threshold_crossings = 0;
+                        if (params.isExcludeLoops()){ 
+                            // MAX based version - prevents reward loops for placing and then breaking an item
+                            // If we cross the reward thresholds that our max has not, then we get points based on the number of new increments crossed
+                            number_threshold_crossings = (int) Math.floor(nowCollected / matcher.matchSpec.getAmount()) - (int) Math.floor(maxCollected / matcher.matchSpec.getAmount());
+                        } else { 
+                            // DENSE version - allows reward loops. Works well for items that cannot be lost and repeatedly gained, e.g. MINECRAFT:LOG
+                            // If we cross the reward threshold with the new change we get points based on the number of increments crossed
+                            number_threshold_crossings = (int) Math.floor(item_stack.getCount() / matcher.matchSpec.getAmount());
+                        }
+                        
+                        if (number_threshold_crossings > 0){
+                            int dimension = params.getDimension();
+                            float adjusted_reward = this.adjustAndDistributeReward(
+                                    ((BlockOrItemSpecWithReward) matcher.matchSpec).getReward().floatValue() * number_threshold_crossings,
+                                    params.getDimension(),
+                                    ((BlockOrItemSpecWithReward) matcher.matchSpec).getDistribution());
+                            addCachedReward(dimension, adjusted_reward);
+                        }
                     }
                 }
             }
 
-            addCollectedItemCount(is);
+            addCollectedItemCount(item_stack);
         }
     }
 
