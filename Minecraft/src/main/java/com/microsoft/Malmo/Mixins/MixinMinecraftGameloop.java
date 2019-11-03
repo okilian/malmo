@@ -180,59 +180,62 @@ public abstract class MixinMinecraftGameloop {
         }
 
 
-        this.mcProfiler.startSection("preRenderErrors");
-        long i1 = System.nanoTime() - l;
-        this.checkGLError("Pre render");
-        this.mcProfiler.endSection();
-        this.mcProfiler.startSection("sound");
-        this.mcSoundHandler.setListener(this.player, this.timer.renderPartialTicks);
-        // this.mcProfiler.endSection();
-        this.mcProfiler.endSection();
-        this.mcProfiler.startSection("render");
-        GlStateManager.pushMatrix();
-        GlStateManager.clear(16640);
-        this.framebufferMc.bindFramebuffer(true);
-        this.mcProfiler.startSection("display");
-        GlStateManager.enableTexture2D();
-        this.mcProfiler.endSection(); //display
 
-        if (!this.skipRenderWorld)
-        {
-            net.minecraftforge.fml.common.FMLCommonHandler.instance().onRenderTickStart(this.timer.renderPartialTicks);
-            this.mcProfiler.endStartSection("gameRenderer");
-            this.entityRenderer.updateCameraAndRender(this.timer.renderPartialTicks, i);
+        if(TimeHelper.SyncManager.renderingEnabled || !TimeHelper.SyncManager.isSynchronous() ){
+            this.mcProfiler.startSection("preRenderErrors");
+            long i1 = System.nanoTime() - l;
+            this.checkGLError("Pre render");
             this.mcProfiler.endSection();
-            net.minecraftforge.fml.common.FMLCommonHandler.instance().onRenderTickEnd(this.timer.renderPartialTicks);
-        }
+            this.mcProfiler.startSection("sound");
+            this.mcSoundHandler.setListener(this.player, this.timer.renderPartialTicks);
+            // this.mcProfiler.endSection();
+            this.mcProfiler.endSection();
+            this.mcProfiler.startSection("render");
+            GlStateManager.pushMatrix();
+            GlStateManager.clear(16640);
+            this.framebufferMc.bindFramebuffer(true);
+            this.mcProfiler.startSection("display");
+            GlStateManager.enableTexture2D();
+            this.mcProfiler.endSection(); //display
 
-        this.mcProfiler.endSection(); ///root
-        if (this.gameSettings.showDebugInfo && this.gameSettings.showDebugProfilerChart && !this.gameSettings.hideGUI)
-        {
-            if (!this.mcProfiler.profilingEnabled)
+            if (!this.skipRenderWorld)
             {
-                this.mcProfiler.clearProfiling();
+                net.minecraftforge.fml.common.FMLCommonHandler.instance().onRenderTickStart(this.timer.renderPartialTicks);
+                this.mcProfiler.endStartSection("gameRenderer");
+                this.entityRenderer.updateCameraAndRender(this.timer.renderPartialTicks, i);
+                this.mcProfiler.endSection();
+                net.minecraftforge.fml.common.FMLCommonHandler.instance().onRenderTickEnd(this.timer.renderPartialTicks);
             }
 
-        this.mcProfiler.profilingEnabled = true;
+            this.mcProfiler.endSection(); ///root
+            if (this.gameSettings.showDebugInfo && this.gameSettings.showDebugProfilerChart && !this.gameSettings.hideGUI)
+            {
+                if (!this.mcProfiler.profilingEnabled)
+                {
+                    this.mcProfiler.clearProfiling();
+                }
 
-            this.displayDebugInfo(i1);
+            this.mcProfiler.profilingEnabled = true;
+
+                this.displayDebugInfo(i1);
+            }
+            else
+            {
+                this.mcProfiler.profilingEnabled = false;
+                this.prevFrameTime = System.nanoTime();
+            }
+
+            this.guiAchievement.updateAchievementWindow();
+            this.framebufferMc.unbindFramebuffer();
+            GlStateManager.popMatrix();
+            GlStateManager.pushMatrix();
+            this.framebufferMc.framebufferRender(this.displayWidth, this.displayHeight);
+            GlStateManager.popMatrix();
+            GlStateManager.pushMatrix();
+            this.entityRenderer.renderStreamIndicator(this.timer.renderPartialTicks);
+            GlStateManager.popMatrix();
+
         }
-        else
-        {
-            this.mcProfiler.profilingEnabled = false;
-            this.prevFrameTime = System.nanoTime();
-        }
-
-        this.guiAchievement.updateAchievementWindow();
-        this.framebufferMc.unbindFramebuffer();
-        GlStateManager.popMatrix();
-        GlStateManager.pushMatrix();
-        this.framebufferMc.framebufferRender(this.displayWidth, this.displayHeight);
-        GlStateManager.popMatrix();
-        GlStateManager.pushMatrix();
-        this.entityRenderer.renderStreamIndicator(this.timer.renderPartialTicks);
-        GlStateManager.popMatrix();
-
         this.mcProfiler.startSection("root");
         this.updateDisplay();
         lastUpdateTime = System.nanoTime();

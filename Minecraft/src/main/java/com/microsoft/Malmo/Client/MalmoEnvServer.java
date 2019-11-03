@@ -504,8 +504,10 @@ public class MalmoEnvServer implements IWantToQuit {
         // TimeHelper.SyncManager.debugLog("[MALMO_ENV_SERVER] <STEP> Lock released. Writing observation, info, done.");
         
         profiler.startSection("writeObs");
-        dout.writeInt(obs.length);
-        dout.write(obs);
+        if(obs != null){
+            dout.writeInt(obs.length);
+            dout.write(obs);
+        }
 
         dout.writeInt(BYTES_DOUBLE + 2);
         dout.writeDouble(reward);
@@ -592,8 +594,10 @@ public class MalmoEnvServer implements IWantToQuit {
             lock.unlock();
         }
 
-        dout.writeInt(obs.length);
-        dout.write(obs);
+        if(obs != null){
+            dout.writeInt(obs.length);
+            dout.write(obs);
+        }
 
         byte[] infoBytes = info.getBytes(utf8);
         dout.writeInt(infoBytes.length);
@@ -608,7 +612,7 @@ public class MalmoEnvServer implements IWantToQuit {
     // Get the current observation. If none and not done wait for a short time.
     public byte[] getObservation(boolean done)  {
         byte[] obs = envState.obs;
-        if (obs == null){
+        if (obs == null && TimeHelper.SyncManager.renderingEnabled ){
             System.out.println("[ERROR] Video observation is null; please notify the developer.");
         }
         return obs;

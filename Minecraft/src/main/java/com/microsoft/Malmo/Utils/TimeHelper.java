@@ -53,6 +53,7 @@ public class TimeHelper
     private static float currentTicksPerSecond = 0;
 
     static public class SyncManager {
+        public static Boolean renderingEnabled = false;
         static Boolean synchronous = false;
         static Boolean shouldClientTick =false;
         static Boolean clientTickCompleted = false;
