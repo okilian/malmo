@@ -53,6 +53,13 @@ public class CameraCommandsImplementation extends CommandBase {
 
             float pitch = Float.parseFloat(camParams[0]);
             float yaw = Float.parseFloat(camParams[1]);
+
+            // COMPETITION
+            // Converts from the modified space to the original space.
+            pitch *= -0.9090909090909091;
+            yaw *= -1.25;
+
+
             EntityPlayerSP player = Minecraft.getMinecraft().player;
             if (player != null) {
                 this.currentYaw = player.rotationYaw;

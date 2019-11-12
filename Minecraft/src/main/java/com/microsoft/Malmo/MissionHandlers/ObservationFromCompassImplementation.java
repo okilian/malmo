@@ -180,6 +180,11 @@ public class ObservationFromCompassImplementation extends HandlerBase implements
 		float angle = angleGetter.apply(compassStack, mc.world, mc.player);
 		angle = ((angle*360 + 180) % 360) - 180;
 
+
+		// COMPETITION
+		// Convert from original space TO modified space.
+		angle *= -0.8;
+
 		compassJson.addProperty("compassAngle", angle); // Current compass angle [-180 - 180]
 		compassJson.addProperty("hasCompass", hasCompass); // Player has compass in main inv or offhand
 		compassJson.addProperty("hasHotbarCompass", hasHotbarCompass); // Player has compass in HOTBAR

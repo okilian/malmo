@@ -15,8 +15,8 @@ difficulty:2
 fancyGraphics:false
 ao:2
 renderClouds:true
-resourcePacks:[]
-incompatibleResourcePacks:[]
+resourcePacks:["Kawaii.zip"]
+incompatibleResourcePacks:["Kawaii.zip"]
 lastServer:
 lang:en_us
 chatVisibility:0
