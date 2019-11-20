@@ -177,7 +177,8 @@ public class PlaceCommandsImplementation extends CommandBase implements ICommand
             return true;
 
         RayTraceResult mop = Minecraft.getMinecraft().objectMouseOver;
-        if (mop.typeOfHit == RayTraceResult.Type.BLOCK) {
+        // https://www.minecraftforge.net/forum/topic/17145-getting-the-entity-a-player-is-looking-at-getting-around-a-null-pointer/
+        if (mop != null && mop.typeOfHit == RayTraceResult.Type.BLOCK) {
             BlockPos pos = mop.getBlockPos().add(mop.sideHit.getDirectionVec());
             // Can we place this block here?
             AxisAlignedBB axisalignedbb = block.getDefaultState().getCollisionBoundingBox(player.world, pos);
