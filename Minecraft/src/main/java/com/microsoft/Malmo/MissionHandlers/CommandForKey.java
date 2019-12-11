@@ -350,8 +350,9 @@ public class CommandForKey extends CommandBase
                     kbp = (KeyBindingMap) (f.get(null));
                     // Our new keybinding should already have been added;
                     // just need to remove the original one.
-                    while (kbp.lookupAll(this.keyHook.getKeyCode()).size() > 1)
-                        kbp.removeKey(this.originalBinding);
+                    // while (kbp.lookupAll(this.keyHook.getKeyCode()).size() > 1)
+                        // kbp.removeKey(this.originalBinding);
+                        // Oh shit this might not be working!!!!! That's crazy :)
                     return;
                 }
                 catch (IllegalArgumentException e)
