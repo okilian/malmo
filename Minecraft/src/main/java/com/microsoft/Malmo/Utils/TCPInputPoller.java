@@ -277,6 +277,7 @@ public class TCPInputPoller extends Thread
     {
         synchronized(this)
         {
+            System.out.println("#Olli: commandReceived: " + command);
             if (onCommand(command, ipOriginator, dos))
             {
                 // Add this command to our list - the calling thread will
